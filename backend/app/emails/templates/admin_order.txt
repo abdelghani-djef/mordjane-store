@@ -1,0 +1,26 @@
+{{ intro }}
+{% if note %}
+
+{{ t.admin_note }}: {{ note }}
+{% endif %}
+
+{{ t.customer }}: {{ order.customer_name }}, {{ order.phone }}{% if order.email %}, {{ order.email }}{% endif %}
+
+{{ t.open_admin }}: {{ admin_url }}
+
+{{ order.code }} ({{ t.placed_on.format(date=when(order.created_at)) }})
+{% for item in order.items %}
+- {{ item.quantity }} × {{ item_name(item) }}{% if item.weight_grams %}{{ t.list_sep }}{{ weight(item.weight_grams) }}{% endif %}: {{ money(item.line_total) }}
+{% endfor %}
+
+{{ t.subtotal }}: {{ money(order.subtotal) }}
+{{ t.delivery.format(city=city_name or order.city) }}: {{ money(order.delivery_fee) }}
+{{ t.total }}: {{ money(order.total) }}
+
+{{ t.deliver_to }}: {{ order.address }} / {{ area or order.city }}
+{% if order.notes %}
+{{ t.admin_note }}: {{ order.notes }}
+{% endif %}
+
+--
+{{ t.admin_footer }}

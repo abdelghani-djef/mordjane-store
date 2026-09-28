@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{{ subject }}</title>
+</head>
+<body dir="{{ dir }}" style="margin:0;padding:0;background:#FFFBF5;font-family:Helvetica,Arial,sans-serif;color:#2A1E17;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFBF5;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #EFE2D1;border-radius:14px;overflow:hidden;">
+        <tr>
+          <td align="{{ start }}" style="background:#C8202B;padding:18px 24px;">
+            <span style="font-size:22px;font-weight:bold;color:#FFFFFF;">Mordjane</span>
+            <span style="font-size:13px;color:#FBE8CF;padding:0 8px;">{{ t.brand_tagline }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td align="{{ start }}" style="padding:28px 24px 8px 24px;font-size:15px;line-height:1.55;">
+            {% block content %}{% endblock %}
+          </td>
+        </tr>
+        <tr>
+          <td align="{{ start }}" style="padding:16px 24px 24px 24px;font-size:12px;line-height:1.5;color:#6B5646;border-top:1px solid #EFE2D1;">
+            {% block footer %}{{ t.footer }}{% endblock %}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,5 @@
+src/components/ui
+src/lib/api-types.ts
+.next
+node_modules
+package-lock.json

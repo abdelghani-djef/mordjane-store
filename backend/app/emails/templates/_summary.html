@@ -1,0 +1,41 @@
+{# Order lines and totals, shared by customer and admin order emails. #}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse;font-size:14px;">
+  <tr>
+    <th align="{{ start }}" style="padding:8px 0;border-bottom:2px solid #EFE2D1;color:#6B5646;font-weight:normal;">{{ t.product }}</th>
+    <th align="center" style="padding:8px 0;border-bottom:2px solid #EFE2D1;color:#6B5646;font-weight:normal;">{{ t.qty }}</th>
+    <th align="{{ end }}" style="padding:8px 0;border-bottom:2px solid #EFE2D1;color:#6B5646;font-weight:normal;">{{ t.amount }}</th>
+  </tr>
+  {% for item in order.items %}
+  <tr>
+    <td align="{{ start }}" style="padding:10px 8px;border-bottom:1px solid #EFE2D1;">
+      <strong>{{ item_name(item) }}</strong><br>
+      <span style="color:#6B5646;">{% if item.weight_grams %}{{ weight(item.weight_grams) }} · {% endif %}{{ money(item.unit_price) }}</span>
+    </td>
+    <td align="center" style="padding:10px 0;border-bottom:1px solid #EFE2D1;">{{ item.quantity }}</td>
+    <td align="{{ end }}" style="padding:10px 0;border-bottom:1px solid #EFE2D1;white-space:nowrap;">{{ money(item.line_total) }}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td colspan="2" align="{{ start }}" style="padding:10px 0 2px 0;color:#6B5646;">{{ t.subtotal }}</td>
+    <td align="{{ end }}" style="padding:10px 0 2px 0;white-space:nowrap;">{{ money(order.subtotal) }}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="{{ start }}" style="padding:2px 0;color:#6B5646;">{{ t.delivery.format(city=city_name or order.city) }}</td>
+    <td align="{{ end }}" style="padding:2px 0;white-space:nowrap;">{{ money(order.delivery_fee) }}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="{{ start }}" style="padding:8px 0;font-size:16px;font-weight:bold;">{{ t.total }}</td>
+    <td align="{{ end }}" style="padding:8px 0;font-size:18px;font-weight:bold;color:#C8202B;white-space:nowrap;">{{ money(order.total) }}</td>
+  </tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;margin-bottom:12px;">
+  <tr>
+    <td valign="top" align="{{ start }}" style="padding:8px 12px;width:50%;">
+      <span style="color:#6B5646;">{{ t.deliver_to }}</span><br>
+      {{ order.customer_name }}<br>{{ order.address }}<br>{{ area or order.city }}<br><span dir="ltr">{{ order.phone }}</span>
+    </td>
+    <td valign="top" align="{{ start }}" style="padding:8px 0;width:50%;">
+      <span style="color:#6B5646;">{{ t.payment }}</span><br>{{ t.cod }}
+    </td>
+  </tr>
+</table>

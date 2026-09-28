@@ -1,0 +1,28 @@
+{{ t.hello.format(name=order.customer_name) }}
+
+{{ intro }}
+
+{% if show_code %}
+{{ t.your_code }}: {{ order.code }}
+{{ t.keep_code }}
+{% endif %}
+{{ t.track_button }}: {{ track_url }}
+
+{{ t.order_heading }} ({{ order.code }}, {{ t.placed_on.format(date=when(order.created_at)) }})
+{% for item in order.items %}
+- {{ item.quantity }} × {{ item_name(item) }}{% if item.weight_grams %}{{ t.list_sep }}{{ weight(item.weight_grams) }}{% endif %}: {{ money(item.line_total) }}
+{% endfor %}
+
+{{ t.subtotal }}: {{ money(order.subtotal) }}
+{{ t.delivery.format(city=city_name or order.city) }}: {{ money(order.delivery_fee) }}
+{{ t.total }}: {{ money(order.total) }}
+{{ t.payment }}: {{ t.cod }}
+
+{{ t.deliver_to }}:
+{{ order.customer_name }}
+{{ order.address }}
+{{ area or order.city }}
+{{ order.phone }}
+
+--
+{{ t.footer }}

@@ -1,0 +1,332 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Mordjane — hazelnut spreads & pastry products. "Hazelnut cream & red".
+ * Light: cream-white surfaces, roasted-hazelnut ink, bold red primary, caramel and cream-wave
+ * accents (the colours of the spreads themselves). Dark: roasted-hazelnut night.
+ * Every *-foreground on its surface is ≥ 4.5:1 (WCAG AA). --honey (caramel) is a fill; use
+ * --honey-ink for caramel-coloured text. --success marks stock, --info marks shipped orders.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-figtree), var(--font-noto-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-heading:
+    var(--font-fredoka), var(--font-baloo-arabic), var(--font-figtree), ui-rounded, system-ui,
+    sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Brand extras */
+  --color-soft: var(--soft);
+  --color-soft-foreground: var(--soft-foreground);
+  --color-almond: var(--almond);
+  --color-honey: var(--honey);
+  --color-honey-foreground: var(--honey-foreground);
+  --color-honey-ink: var(--honey-ink);
+  --color-praline: var(--praline);
+  --color-praline-foreground: var(--praline-foreground);
+  --color-niche: var(--niche);
+  --color-plank: var(--plank);
+  --color-success: var(--success);
+  --color-info: var(--info);
+
+  /* Radius follows hierarchy: controls are small, images and panels generous, buttons pill. */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --radius: 0.8rem;
+
+  --background: oklch(0.99 0.009 78.3); /* #FFFBF5 cream white */
+  --foreground: oklch(0.247 0.023 51.6); /* #2A1E17 roasted hazelnut ink */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.247 0.023 51.6);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.247 0.023 51.6);
+  --primary: oklch(0.537 0.2 24.8); /* #C8202B red */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.039 74.8); /* #FBE8CF cream */
+  --secondary-foreground: oklch(0.434 0.099 53);
+  --muted: oklch(0.956 0.016 73.7); /* #F7EFE5 */
+  --muted-foreground: oklch(0.47 0.037 59); /* #6B5646 */
+  --accent: oklch(0.956 0.016 73.7);
+  --accent-foreground: oklch(0.247 0.023 51.6);
+  --destructive: oklch(0.491 0.18 27.5); /* #B0201E */
+  --border: oklch(0.919 0.027 74.7); /* #EFE2D1 */
+  --input: oklch(0.88 0.035 72);
+  --ring: oklch(0.537 0.2 24.8);
+
+  --soft: oklch(0.94 0.039 74.8); /* #FBE8CF cream wave */
+  --soft-foreground: oklch(0.434 0.099 53); /* #7A3F12 */
+  --almond: oklch(0.932 0.032 73.5); /* #F6E6D2 praline */
+  --honey: oklch(0.764 0.142 72.2); /* #E9A23B caramel */
+  --honey-foreground: oklch(0.247 0.023 51.6);
+  --honey-ink: oklch(0.503 0.109 62.6); /* #8F5410, text-safe */
+  /*
+   * Home page surfaces, the same in both themes. Packshots are photographed on white and blended
+   * (multiply) onto the niche, which therefore stays light even in dark mode: a lit display niche.
+   */
+  --praline: oklch(0.29 0.046 45); /* #3F2417 the spread itself: the jar-to-bucket story */
+  --praline-foreground: oklch(0.975 0.022 78); /* #FFF4E6 */
+  --niche: oklch(0.938 0.035 76); /* #F8E6CF plaster niche the packs stand in */
+  --plank: oklch(0.72 0.083 62); /* #C99A6B shelf */
+  --success: oklch(0.52 0.104 154.3); /* #2E7A4D in stock */
+  --info: oklch(0.484 0.132 258.2); /* #2A5DA8 shipped */
+
+  --chart-1: oklch(0.537 0.2 24.8);
+  --chart-2: oklch(0.764 0.142 72.2);
+  --chart-3: oklch(0.484 0.132 258.2);
+  --chart-4: oklch(0.52 0.104 154.3);
+  --chart-5: oklch(0.434 0.099 53);
+
+  --sidebar: oklch(0.975 0.012 76); /* #FDF6EC */
+  --sidebar-foreground: oklch(0.247 0.023 51.6);
+  --sidebar-primary: oklch(0.537 0.2 24.8);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.039 74.8);
+  --sidebar-accent-foreground: oklch(0.434 0.099 53);
+  --sidebar-border: oklch(0.919 0.027 74.7);
+  --sidebar-ring: oklch(0.537 0.2 24.8);
+}
+
+.dark {
+  --background: oklch(0.195 0.016 53.5); /* #1B130E */
+  --foreground: oklch(0.951 0.02 70);
+  --card: oklch(0.229 0.022 53.8); /* #251A13 */
+  --card-foreground: oklch(0.951 0.02 70);
+  --popover: oklch(0.229 0.022 53.8);
+  --popover-foreground: oklch(0.951 0.02 70);
+  --primary: oklch(0.689 0.17 27.4); /* #F26A5E */
+  --primary-foreground: oklch(0.195 0.016 53.5);
+  --secondary: oklch(0.291 0.039 60.5);
+  --secondary-foreground: oklch(0.9 0.06 75.1);
+  --muted: oklch(0.257 0.025 52.9);
+  --muted-foreground: oklch(0.78 0.037 63.1);
+  --accent: oklch(0.257 0.025 52.9);
+  --accent-foreground: oklch(0.951 0.02 70);
+  --destructive: oklch(0.746 0.132 27.4);
+  --border: oklch(0.951 0.02 70 / 12%);
+  --input: oklch(0.951 0.02 70 / 16%);
+  --ring: oklch(0.689 0.17 27.4);
+
+  --soft: oklch(0.291 0.039 60.5);
+  --soft-foreground: oklch(0.9 0.06 75.1);
+  --almond: oklch(0.257 0.025 52.9);
+  --honey: oklch(0.803 0.136 76.6);
+  --honey-foreground: oklch(0.195 0.016 53.5);
+  --honey-ink: oklch(0.803 0.136 76.6);
+  --success: oklch(0.77 0.122 154.6);
+  --info: oklch(0.76 0.09 257.6);
+
+  --chart-1: oklch(0.689 0.17 27.4);
+  --chart-2: oklch(0.803 0.136 76.6);
+  --chart-3: oklch(0.76 0.09 257.6);
+  --chart-4: oklch(0.77 0.122 154.6);
+  --chart-5: oklch(0.9 0.06 75.1);
+
+  --sidebar: oklch(0.175 0.014 53.5);
+  --sidebar-foreground: oklch(0.951 0.02 70);
+  --sidebar-primary: oklch(0.689 0.17 27.4);
+  --sidebar-primary-foreground: oklch(0.195 0.016 53.5);
+  --sidebar-accent: oklch(0.257 0.025 52.9);
+  --sidebar-accent-foreground: oklch(0.951 0.02 70);
+  --sidebar-border: oklch(0.951 0.02 70 / 10%);
+  --sidebar-ring: oklch(0.689 0.17 27.4);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-optical-sizing: auto;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+  /* Display type: Fredoka's rounded forms, medium-heavy, a touch tight. */
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .price {
+    @apply font-heading font-semibold tabular-nums;
+  }
+}
+
+/*
+ * Arabic (shop only). Unlayered, so it wins over utilities like `leading-[1.05]`: Arabic
+ * letters join, so no letter-spacing, and its taller ascenders and dots need looser leading.
+ */
+:lang(ar) :is(h1, h2, h3, .price, .tracking-wide) {
+  letter-spacing: 0;
+}
+:lang(ar) :is(h1, h2) {
+  line-height: 1.35;
+}
+:lang(ar) body {
+  line-height: 1.7;
+}
+
+/*
+ * Home page motion. One load sequence in the hero; everything else follows the reader's scroll.
+ * Scroll-linked effects use CSS scroll timelines as a progressive enhancement: without support,
+ * or with reduced motion, everything simply sits in place.
+ */
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+}
+@keyframes home-open {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+}
+@keyframes home-drop {
+  from {
+    opacity: 0;
+    translate: 0 -2.5rem;
+  }
+  70% {
+    translate: 0 0.2rem;
+  }
+}
+@keyframes shelf-settle {
+  from {
+    opacity: 0;
+    translate: 0 -1.75rem;
+  }
+}
+@keyframes story-number {
+  from {
+    opacity: 0;
+    translate: 0 6%;
+  }
+}
+
+@layer components {
+  .home-rise {
+    animation: home-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms) both;
+  }
+  .home-open {
+    animation: home-open 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .home-drop {
+    animation: home-drop 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) var(--delay, 0ms) both;
+  }
+  /* The arched niche packs stand in: shaded under the arch and on the floor, so it reads carved. */
+  .niche {
+    @apply relative overflow-hidden rounded-t-full bg-niche;
+    box-shadow:
+      inset 0 1.5rem 1.75rem -1.5rem rgb(122 63 18 / 0.24),
+      inset 0 -3.5rem 3.5rem -3rem rgb(122 63 18 / 0.3);
+  }
+  .story-number {
+    animation: story-number 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+/*
+ * Hero, driven by --hero-p (0 → 1 as the hero scrolls away; set by <HeroScroll>, stays 0 with
+ * reduced motion): the text rises and fades, the arch comes forward, the small pack lifts and
+ * tilts out of the niche while the big one settles back.
+ */
+.hero-text {
+  translate: 0 calc(var(--hero-p, 0) * -4.5rem);
+  opacity: calc(1 - var(--hero-p, 0) * 1.2);
+}
+.hero-arch {
+  translate: 0 calc(var(--hero-p, 0) * 3.5rem);
+  scale: calc(1 + var(--hero-p, 0) * 0.07);
+}
+.hero-large {
+  transform-origin: bottom;
+  scale: calc(1 - var(--hero-p, 0) * 0.08);
+}
+.hero-small {
+  transform-origin: bottom;
+  translate: 0 calc(var(--hero-p, 0) * -6rem);
+  rotate: calc(var(--hero-p, 0) * -10deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    /* Shelves: packs settle into their niches, one after the other, as the shelf comes in. */
+    .shelf {
+      view-timeline: --shelf block;
+    }
+    .shelf-pack {
+      animation: shelf-settle linear both;
+      animation-timeline: --shelf;
+      animation-range: entry calc(15% + var(--i, 0) * 7%) entry calc(75% + var(--i, 0) * 7%);
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{{ t.admin_low_intro.format(threshold=threshold) }}
+
+{% for row in rows %}
+- {{ row.name }}, {{ row.size }}: {{ t.stock_left }} {{ row.stock }} ({{ row.url }})
+{% endfor %}
+
+{{ t.open_products }}: {{ products_url }}
+
+--
+{{ t.admin_footer }}
