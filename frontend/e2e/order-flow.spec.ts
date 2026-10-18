@@ -72,7 +72,6 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page }
   expect(code).toMatch(/^MJ-[A-Z2-9]{6}$/);
   await expect(page.getByRole("heading", { name: code })).toBeVisible();
 
-
   // --- admin validates, ships, delivers -----------------------------------------------------
   await page.goto("/en/admin/login");
   await page.getByLabel("Email").fill(ADMIN_EMAIL);
@@ -194,5 +193,67 @@ test("a product switched off while in the cart can't be checked out", async ({ p
     await expect(page).toHaveURL(/\/en\/cart$/);
   } finally {
     await api.patch(`/api/admin/products/${product.id}`, { data: { is_available: true } });
+  }
+});
+
+test("a pack shows both prices and checks out as one box", async ({ page }) => {
+  const api = page.request;
+  const login = await api.post("/api/admin/auth/login", {
+    data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+  });
+  expect(login.ok()).toBeTruthy();
+  const sizeOf = async (slug: string, grams: number) => {
+    const product = await (await api.get(`/api/products/${slug}`)).json();
+    return product.variants.find((v: { weight_grams: number }) => v.weight_grams === grams).id;
+  };
+  // 2 × peanut cream 200 g (5.900) + hazelnut cream 200 g (7.900) = 19.700, sold for 17.900.
+  const name = `E2E box ${Date.now()}`;
+  const created = await api.post("/api/admin/packs", {
+    data: {
+      slug: `e2e-box-${Date.now()}`,
+      name_en: name,
+      name_fr: name,
+      price: "17.900",
+      items: [
+        { variant_id: await sizeOf("creme-cacahuetes", 200), quantity: 2 },
+        { variant_id: await sizeOf("creme-noisettes", 200), quantity: 1 },
+      ],
+    },
+  });
+  expect(created.ok()).toBeTruthy();
+  const pack = await created.json();
+
+  try {
+    await page.goto("/en/packs");
+    const card = page.getByRole("article").filter({ hasText: name });
+    await expect(card.locator(".price", { hasText: "17.900 DT" })).toBeVisible();
+    await expect(card.locator("s", { hasText: "19.700 DT" })).toBeVisible();
+    await expect(card.getByText("You save 1.800 DT")).toBeVisible();
+    await expect(
+      card.getByText("2 × Roasted peanut cream, 200 g + Hazelnut cream, 200 g"),
+    ).toBeVisible();
+    await card.getByRole("button", { name: "Add to cart" }).click();
+    await expect(page.getByText("Added to cart").first()).toBeVisible();
+
+    await page.goto("/en/checkout");
+    await expect(page.getByText(`1 × ${name}`)).toBeVisible();
+    await page.getByLabel("Full name").fill("Rania Ben Amor");
+    await page.getByLabel("Phone number").fill("+216 23 456 789");
+    await page.getByLabel("Email", { exact: true }).fill(`rania+${Date.now()}@example.com`);
+    await page.getByLabel(/^Address/).fill("8 Rue de Carthage, Tunis 1000");
+    await page.getByRole("combobox", { name: "Governorate" }).click();
+    await page.getByRole("option", { name: /^Tunis/ }).click();
+    await page.getByRole("combobox", { name: "Delegation" }).click();
+    await page.getByRole("option", { name: "La Marsa" }).click();
+    // 17.900 + 7.000 delivery to Tunis
+    await expect(page.getByText("24.900 DT")).toBeVisible();
+    await page.getByRole("button", { name: "Place order" }).click();
+
+    await expect(page).toHaveURL(/\/en\/track\?code=MJ-/);
+    await expect(
+      page.getByText("In the box: 2 × Roasted peanut cream, 200 g + Hazelnut cream, 200 g"),
+    ).toBeVisible();
+  } finally {
+    await api.delete(`/api/admin/packs/${pack.id}`);
   }
 });

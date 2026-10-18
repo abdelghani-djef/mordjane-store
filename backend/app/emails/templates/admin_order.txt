@@ -11,6 +11,9 @@
 {{ order.code }} ({{ t.placed_on.format(date=when(order.created_at)) }})
 {% for item in order.items %}
 - {{ item.quantity }} × {{ item_name(item) }}{% if item.weight_grams %}{{ t.list_sep }}{{ weight(item.weight_grams) }}{% endif %}: {{ money(item.line_total) }}
+{% for part in item.parts %}
+    {{ part.quantity }} × {{ item_name(part) }}{% if part.weight_grams %}{{ t.list_sep }}{{ weight(part.weight_grams) }}{% endif %}
+{% endfor %}
 {% endfor %}
 
 {{ t.subtotal }}: {{ money(order.subtotal) }}

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import type { Product, Variant } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { MAX_QTY_PER_LINE, useCart } from "@/stores/cart";
+import { MAX_QTY_PER_LINE, sizeKey, useCart } from "@/stores/cart";
 
 type Props = {
   product: Pick<Product, "id" | "slug" | "name_en" | "name_fr" | "name_ar" | "image_url">;
@@ -26,7 +26,7 @@ export function AddToCart({ product, size, categorySlug, layout = "card", classN
   const t = useTranslations("Product");
   const router = useRouter();
   const add = useCart((s) => s.add);
-  const inCart = useCart((s) => s.lines.find((l) => l.variantId === size.id)?.quantity ?? 0);
+  const inCart = useCart((s) => s.lines.find((l) => l.key === sizeKey(size.id))?.quantity ?? 0);
   const [qty, setQty] = useState(1);
 
   const max = Math.min(MAX_QTY_PER_LINE, size.stock ?? MAX_QTY_PER_LINE);

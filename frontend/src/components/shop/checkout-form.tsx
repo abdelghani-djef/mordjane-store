@@ -116,7 +116,11 @@ export function CheckoutForm({ cities }: { cities: DeliveryCity[] }) {
           delivery_city_id: Number(values.delivery_city_id),
           delegation_id: Number(values.delegation_id),
           locale,
-          items: lines.map((l) => ({ variant_id: l.variantId, quantity: l.quantity })),
+          items: lines.map((l) =>
+            l.kind === "pack"
+              ? { pack_id: l.packId, quantity: l.quantity }
+              : { variant_id: l.variantId, quantity: l.quantity },
+          ),
         },
       });
       setPlaced(true);

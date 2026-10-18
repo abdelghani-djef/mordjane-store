@@ -4,7 +4,7 @@ import { ShoppingBagIcon, Trash2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ProductImage } from "@/components/shop/product-image";
+import { LineDetail, LineThumb, useProblemText } from "@/components/shop/cart-line-parts";
 import { QuantityStepper } from "@/components/shop/quantity-stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,12 +28,13 @@ import {
 } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
 import { isRtl } from "@/i18n/routing";
-import { formatPrice, formatWeight } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import {
   cartCount,
   cartSubtotal,
   hasBlockedLines,
   isBlocked,
+  lineHref,
   lineName,
   useCart,
   useHydrated,
@@ -47,6 +48,7 @@ export function CartSheet() {
   const lines = useCart((s) => s.lines);
   const setQuantity = useCart((s) => s.setQuantity);
   const remove = useCart((s) => s.remove);
+  const problemText = useProblemText();
   const [open, setOpen] = useState(false);
 
   const count = hydrated ? cartCount(lines) : 0;
@@ -100,29 +102,22 @@ export function CartSheet() {
               <ul className="divide-y px-4">
                 {lines.map((line) => {
                   const name = lineName(line, locale);
+                  const href = lineHref(line);
                   return (
-                    <li key={line.variantId} className="flex gap-3 py-4">
+                    <li key={line.key} className="flex gap-3 py-4">
                       <Link
-                        href={`/products/${line.slug}`}
+                        href={href}
                         onClick={() => setOpen(false)}
                         className="shrink-0"
                         tabIndex={-1}
                         aria-hidden
                       >
-                        <ProductImage
-                          imageUrl={line.imageUrl}
-                          alt={name}
-                          hint={`${line.categorySlug ?? ""} ${line.slug}`}
-                          seed={line.productId}
-                          grams={line.weightGrams}
-                          sizes="80px"
-                          className="size-20 rounded-lg"
-                        />
+                        <LineThumb line={line} sizes="80px" className="size-20 rounded-lg" />
                       </Link>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <div className="flex items-start justify-between gap-2">
                           <Link
-                            href={`/products/${line.slug}`}
+                            href={href}
                             onClick={() => setOpen(false)}
                             className="line-clamp-2 leading-snug font-medium hover:underline"
                           >
@@ -131,30 +126,22 @@ export function CartSheet() {
                           <Button
                             variant="ghost"
                             size="icon-xs"
-                            onClick={() => remove(line.variantId)}
+                            onClick={() => remove(line.key)}
                             aria-label={`${t("remove")} ${name}`}
                           >
                             <Trash2Icon />
                           </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {formatPrice(line.price, locale)}
-                          {` / ${formatWeight(line.weightGrams, locale)}`}
-                        </p>
+                        <LineDetail line={line} />
                         {isBlocked(line) && line.problem && (
-                          <p className="text-xs text-destructive">
-                            {t(
-                              `problem.${line.problem.reason as "not_found" | "unavailable" | "insufficient_stock"}`,
-                              { available: line.problem.available ?? 0 },
-                            )}
-                          </p>
+                          <p className="text-xs text-destructive">{problemText(line)}</p>
                         )}
                         <div className="mt-auto flex items-center justify-between">
                           <QuantityStepper
                             size="sm"
                             value={line.quantity}
                             max={line.maxQuantity ?? 99}
-                            onChange={(q) => setQuantity(line.variantId, q)}
+                            onChange={(q) => setQuantity(line.key, q)}
                           />
                           <span className="price font-semibold">
                             {formatPrice(Number(line.price) * line.quantity, locale)}

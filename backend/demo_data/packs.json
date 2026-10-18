@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "duo-petit-dejeuner",
+    "name_en": "Breakfast duo",
+    "name_fr": "Duo petit-déjeuner",
+    "name_ar": "ثنائي الفطور",
+    "description_en": "Our two classic spreads in the 350 g jar: cocoa hazelnut for the kids, hazelnut cream for the grown-ups.",
+    "description_fr": "Nos deux pâtes à tartiner classiques en pot de 350 g : cacao noisettes pour les enfants, crème de noisettes pour les grands.",
+    "description_ar": "معجونا الدهن الكلاسيكيان في علبة 350 غ: الكاكاو بالبندق للصغار وكريمة البندق للكبار.",
+    "price": "21.900",
+    "is_featured": true,
+    "sort_order": 1,
+    "items": [
+      {"product": "pate-a-tartiner", "grams": 350, "quantity": 1},
+      {"product": "creme-noisettes", "grams": 350, "quantity": 1}
+    ]
+  },
+  {
+    "slug": "trio-croquant",
+    "name_en": "Crunchy trio",
+    "name_fr": "Trio croquant",
+    "name_ar": "ثلاثي المقرمش",
+    "description_en": "Three 200 g jars to taste the range: crunchy cocoa hazelnut, crunchy hazelnut cream and roasted peanut.",
+    "description_fr": "Trois pots de 200 g pour goûter la gamme : cacao noisettes croquant, crème de noisettes croquante et cacahuète grillée.",
+    "description_ar": "ثلاث علب 200 غ لتذوق التشكيلة: الكاكاو بالبندق المقرمش، كريمة البندق المقرمشة وكريمة الفول السوداني المحمص.",
+    "price": "19.900",
+    "is_featured": true,
+    "sort_order": 2,
+    "items": [
+      {"product": "pate-a-tartiner-rocher", "grams": 200, "quantity": 1},
+      {"product": "creme-noisettes-rocher", "grams": 200, "quantity": 1},
+      {"product": "creme-cacahuetes", "grams": 200, "quantity": 1}
+    ]
+  },
+  {
+    "slug": "kit-patisserie",
+    "name_en": "Pastry kit",
+    "name_fr": "Kit pâtisserie",
+    "name_ar": "علبة الحلويات",
+    "description_en": "Everything for a chocolate cake: cocoa powder, whipped cream powder, vanilla and two dark glazing pastes.",
+    "description_fr": "Tout pour un gâteau au chocolat : cacao en poudre, chantilly en poudre, vanille et deux pâtes à glacer noires.",
+    "description_ar": "كل ما تحتاجه لكعكة الشوكولاتة: كاكاو بودرة، شانتيي بودرة، فانيليا وعلبتان من عجينة التزيين السوداء.",
+    "price": "26.500",
+    "is_featured": true,
+    "sort_order": 3,
+    "items": [
+      {"product": "cacao-poudre", "grams": 400, "quantity": 1},
+      {"product": "chantilly-poudre", "grams": 200, "quantity": 1},
+      {"product": "vanille", "grams": 200, "quantity": 1},
+      {"product": "glacage-chocolat-noir", "grams": 250, "quantity": 2}
+    ]
+  },
+  {
+    "slug": "pack-famille",
+    "name_en": "Family pack",
+    "name_fr": "Pack famille",
+    "name_ar": "علبة العائلة",
+    "description_en": "Two 700 g jars of cocoa hazelnut spread, for houses where a jar never lasts the week.",
+    "description_fr": "Deux pots de 700 g de pâte à tartiner cacao noisettes, pour les maisons où un pot ne tient jamais la semaine.",
+    "description_ar": "علبتان 700 غ من معجون الكاكاو بالبندق، للبيوت التي لا تكفيها علبة واحدة طوال الأسبوع.",
+    "price": "37.900",
+    "sort_order": 4,
+    "items": [
+      {"product": "pate-a-tartiner", "grams": 700, "quantity": 2}
+    ]
+  }
+]

@@ -2,6 +2,7 @@
 
 import {
   BellIcon,
+  GiftIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   PackageIcon,
@@ -40,6 +41,7 @@ const NAV = [
   { href: "/admin", key: "dashboard", icon: LayoutDashboardIcon, exact: true },
   { href: "/admin/orders", key: "orders", icon: ReceiptTextIcon },
   { href: "/admin/products", key: "products", icon: PackageIcon },
+  { href: "/admin/packs", key: "packs", icon: GiftIcon },
   { href: "/admin/categories", key: "categories", icon: TagsIcon },
   { href: "/admin/delivery", key: "delivery", icon: TruckIcon },
   { href: "/admin/notifications", key: "notifications", icon: BellIcon },

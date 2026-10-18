@@ -11,9 +11,11 @@ from app.routers import (
     admin_catalog,
     admin_notifications,
     admin_orders,
+    admin_packs,
     delivery,
     orders,
     public_catalog,
+    public_packs,
 )
 from app.services import notifications
 
@@ -48,9 +50,11 @@ def create_app() -> FastAPI:
     api = APIRouter(prefix="/api")
     for module in (
         public_catalog,
+        public_packs,
         orders,
         admin_auth,
         admin_catalog,
+        admin_packs,
         admin_orders,
         admin_notifications,
     ):

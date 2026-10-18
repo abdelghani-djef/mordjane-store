@@ -4,30 +4,51 @@ import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { Product, StockProblem, Variant } from "@/lib/api";
+import type { Pack, Product, StockProblem, Variant } from "@/lib/api";
 import { localizedText } from "@/lib/format";
+import { packContents, type PackContent } from "@/lib/packs";
 
 export const MAX_QTY_PER_LINE = 99;
 
-/** One size of one product in the cart. */
-export type CartLine = {
-  variantId: number;
-  productId: number;
+type LineBase = {
+  /** "v:<size id>" or "p:<pack id>": one line per size and per pack. */
+  key: string;
   slug: string;
   nameEn: string;
   nameFr: string;
   /** Missing on lines added before the shop spoke Arabic. */
   nameAr?: string | null;
-  weightGrams: number;
   price: string;
   imageUrl: string | null;
-  categorySlug?: string;
   quantity: number;
-  /** Known stock ceiling (from the product page or a 409), if any. */
+  /** Known stock ceiling (from the product/pack page or a 409), if any. */
   maxQuantity?: number;
   /** Set when checkout was rejected for this line. */
   problem?: StockProblem;
 };
+
+/** One size of one product in the cart. */
+export type SizeLine = LineBase & {
+  kind: "size";
+  variantId: number;
+  productId: number;
+  weightGrams: number;
+  categorySlug?: string;
+};
+
+/** A pack (several sizes in one box) in the cart. */
+export type PackLine = LineBase & {
+  kind: "pack";
+  packId: number;
+  /** The items bought separately, shown struck through. */
+  regularPrice: string;
+  contents: PackContent[];
+};
+
+export type CartLine = SizeLine | PackLine;
+
+export const sizeKey = (variantId: number) => `v:${variantId}`;
+export const packKey = (packId: number) => `p:${packId}`;
 
 type CartState = {
   lines: CartLine[];
@@ -37,15 +58,21 @@ type CartState = {
     quantity?: number,
     categorySlug?: string,
   ) => void;
-  setQuantity: (variantId: number, quantity: number) => void;
-  remove: (variantId: number) => void;
+  addPack: (pack: Pack, quantity?: number) => void;
+  setQuantity: (key: string, quantity: number) => void;
+  remove: (key: string) => void;
   clear: () => void;
   applyProblems: (problems: StockProblem[]) => void;
 };
 
-/** The line's product name in the shop's language. */
-export function lineName(line: Pick<CartLine, "nameEn" | "nameFr" | "nameAr">, locale: string) {
+/** The line's product (or pack) name in the shop's language. */
+export function lineName(line: Pick<LineBase, "nameEn" | "nameFr" | "nameAr">, locale: string) {
   return localizedText(locale, { en: line.nameEn, fr: line.nameFr, ar: line.nameAr });
+}
+
+/** Where the line's name links to. */
+export function lineHref(line: CartLine): string {
+  return line.kind === "pack" ? `/packs/${line.slug}` : `/products/${line.slug}`;
 }
 
 function clampQty(quantity: number, max?: number) {
@@ -53,67 +80,95 @@ function clampQty(quantity: number, max?: number) {
   return Math.max(1, Math.min(Math.floor(quantity), ceiling));
 }
 
+/** Adds to an existing line (refreshing what the shop just showed) or appends a new one. */
+function upsert(lines: CartLine[], line: CartLine, quantity: number): CartLine[] {
+  const existing = lines.find((l) => l.key === line.key);
+  const maxQuantity = line.maxQuantity ?? existing?.maxQuantity;
+  if (!existing) {
+    return [...lines, { ...line, maxQuantity, quantity: clampQty(quantity, maxQuantity) }];
+  }
+  return lines.map((l) =>
+    l.key === line.key
+      ? {
+          ...line,
+          maxQuantity,
+          problem: undefined,
+          quantity: clampQty(l.quantity + quantity, maxQuantity),
+        }
+      : l,
+  );
+}
+
+function problemFor(line: CartLine, problems: StockProblem[]) {
+  return problems.find((p) =>
+    line.kind === "pack" ? p.pack_id === line.packId : p.variant_id === line.variantId,
+  );
+}
+
 export const useCart = create<CartState>()(
   persist(
     (set) => ({
       lines: [],
       add: (product, variant, quantity = 1, categorySlug) =>
-        set((state) => {
-          const existing = state.lines.find((l) => l.variantId === variant.id);
-          const maxQuantity = variant.stock ?? existing?.maxQuantity;
-          // The size's own packshot, so the cart shows the jar or bucket being bought.
-          const imageUrl = variant.image_url ?? product.image_url;
-          if (existing) {
-            return {
-              lines: state.lines.map((l) =>
-                l.variantId === variant.id
-                  ? {
-                      ...l,
-                      price: variant.price,
-                      imageUrl,
-                      maxQuantity,
-                      problem: undefined,
-                      quantity: clampQty(l.quantity + quantity, maxQuantity),
-                    }
-                  : l,
-              ),
-            };
-          }
-          return {
-            lines: [
-              ...state.lines,
-              {
-                variantId: variant.id,
-                productId: product.id,
-                slug: product.slug,
-                nameEn: product.name_en,
-                nameFr: product.name_fr,
-                nameAr: product.name_ar,
-                weightGrams: variant.weight_grams,
-                price: variant.price,
-                imageUrl,
-                categorySlug,
-                maxQuantity,
-                quantity: clampQty(quantity, maxQuantity),
-              },
-            ],
-          };
-        }),
-      setQuantity: (variantId, quantity) =>
+        set((state) => ({
+          lines: upsert(
+            state.lines,
+            {
+              kind: "size",
+              key: sizeKey(variant.id),
+              variantId: variant.id,
+              productId: product.id,
+              slug: product.slug,
+              nameEn: product.name_en,
+              nameFr: product.name_fr,
+              nameAr: product.name_ar,
+              weightGrams: variant.weight_grams,
+              price: variant.price,
+              // The size's own packshot, so the cart shows the jar or bucket being bought.
+              imageUrl: variant.image_url ?? product.image_url,
+              categorySlug,
+              maxQuantity: variant.stock,
+              quantity: 0,
+            },
+            quantity,
+          ),
+        })),
+      addPack: (pack, quantity = 1) =>
+        set((state) => ({
+          lines: upsert(
+            state.lines,
+            {
+              kind: "pack",
+              key: packKey(pack.id),
+              packId: pack.id,
+              slug: pack.slug,
+              nameEn: pack.name_en,
+              nameFr: pack.name_fr,
+              nameAr: pack.name_ar,
+              price: pack.price,
+              regularPrice: pack.regular_price,
+              imageUrl: pack.image_url,
+              contents: packContents(pack),
+              maxQuantity: pack.boxes_left,
+              quantity: 0,
+            },
+            quantity,
+          ),
+        })),
+      setQuantity: (key, quantity) =>
         set((state) => ({
           lines: state.lines.map((l) =>
-            l.variantId === variantId
+            l.key === key
               ? { ...l, problem: undefined, quantity: clampQty(quantity, l.maxQuantity) }
               : l,
           ),
         })),
-      remove: (variantId) =>
-        set((state) => ({ lines: state.lines.filter((l) => l.variantId !== variantId) })),
+      remove: (key) => set((state) => ({ lines: state.lines.filter((l) => l.key !== key) })),
       clear: () => set({ lines: [] }),
       applyProblems: (problems) =>
         set((state) => ({
           lines: state.lines.map((l) => {
-            const problem = problems.find((p) => p.variant_id === l.variantId);
+            const problem = problemFor(l, problems);
             if (!problem) return { ...l, problem: undefined };
             const available = problem.available ?? 0;
             const shortOnly = problem.reason === "insufficient_stock" && available > 0;
@@ -129,10 +184,18 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "mordjane-cart",
-      // v2: lines are per size (variant). Older carts held whole products and can't be
-      // mapped to a size, so they start empty.
-      version: 2,
-      migrate: () => ({ lines: [] }),
+      // v3: lines are sizes or packs. v2 lines were all sizes and are kept as such; v1 carts
+      // held whole products and can't be mapped to a size, so they start empty.
+      version: 3,
+      migrate: (persisted, version) => {
+        if (version === 2) {
+          const old = (persisted as { lines?: Omit<SizeLine, "kind" | "key">[] }).lines ?? [];
+          return {
+            lines: old.map((l) => ({ ...l, kind: "size" as const, key: sizeKey(l.variantId) })),
+          };
+        }
+        return { lines: [] };
+      },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ lines: state.lines }),
     },

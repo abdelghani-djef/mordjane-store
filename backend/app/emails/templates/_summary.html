@@ -10,6 +10,9 @@
     <td align="{{ start }}" style="padding:10px 8px;border-bottom:1px solid #EFE2D1;">
       <strong>{{ item_name(item) }}</strong><br>
       <span style="color:#6B5646;">{% if item.weight_grams %}{{ weight(item.weight_grams) }} · {% endif %}{{ money(item.unit_price) }}</span>
+      {% if item.parts %}
+      <br><span style="color:#6B5646;font-size:13px;">{{ t.in_box }}:{% for part in item.parts %}<br>{{ part.quantity }} × {{ item_name(part) }}{% if part.weight_grams %}{{ t.list_sep }}{{ weight(part.weight_grams) }}{% endif %}{% endfor %}</span>
+      {% endif %}
     </td>
     <td align="center" style="padding:10px 0;border-bottom:1px solid #EFE2D1;">{{ item.quantity }}</td>
     <td align="{{ end }}" style="padding:10px 0;border-bottom:1px solid #EFE2D1;white-space:nowrap;">{{ money(item.line_total) }}</td>

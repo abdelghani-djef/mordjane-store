@@ -10,6 +10,7 @@
   "Nav": {
     "shop": "Shop",
     "allProducts": "All products",
+    "packs": "Packs",
     "track": "Track order",
     "cart": "Cart",
     "openMenu": "Open menu",
@@ -64,7 +65,9 @@
     "trustDelivery": "All of Tunisia",
     "trustDeliveryText": "All 24 governorates, down to your delegation.",
     "trustTrack": "Order tracking",
-    "trustTrackText": "Your code and phone number are all you need to follow the delivery."
+    "trustTrackText": "Your code and phone number are all you need to follow the delivery.",
+    "packsTitle": "Ready-made boxes",
+    "packsText": "Favourites packed together, for less."
   },
   "Catalog": {
     "title": "Our products",
@@ -117,6 +120,21 @@
     "storage": "Storage",
     "ingredients": "Ingredients"
   },
+  "Packs": {
+    "title": "Packs",
+    "intro": "Several favourites in one box, for less than buying them one by one.",
+    "metaDescription": "Boxes of El Mordjene spreads and baking essentials, cheaper than buying each item.",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "insteadOf": "instead of",
+    "youSave": "You save {amount}",
+    "inTheBox": "In the box",
+    "boxAlt": "Box with {items}",
+    "boxesLeft": "Only {count, plural, one {# box} other {# boxes}} left",
+    "emptyTitle": "No packs right now",
+    "emptyText": "New boxes are on their way. In the meantime, every item is in the shop.",
+    "seeAll": "All packs",
+    "itemPrice": "{price} each"
+  },
   "Cart": {
     "title": "Your cart",
     "empty": "Your cart is empty",
@@ -138,7 +156,13 @@
     "deliveryChooseGovernorate": "Choose a governorate",
     "blockedNotice": "Some items can't be ordered any more. Review your cart to continue.",
     "reviewCart": "Review cart",
-    "lineSummary": "{quantity} × {name}, {size}"
+    "lineSummary": "{quantity} × {name}, {size}",
+    "packProblem": {
+      "not_found": "This pack is no longer sold. Please remove it.",
+      "unavailable": "Something in this pack is unavailable right now. Please remove it.",
+      "insufficient_stock": "Only {available} boxes left — quantity adjusted."
+    },
+    "packSummary": "{quantity} × {name}"
   },
   "Checkout": {
     "title": "Checkout",
@@ -224,6 +248,7 @@
       "dashboard": "Dashboard",
       "orders": "Orders",
       "products": "Products",
+      "packs": "Packs",
       "categories": "Categories",
       "delivery": "Delivery areas",
       "notifications": "Notifications"
@@ -282,7 +307,8 @@
         "en": "Ordered in English",
         "fr": "Ordered in French",
         "ar": "Ordered in Arabic"
-      }
+      },
+      "packContents": "In each box"
     },
     "products": {
       "title": "Products",
@@ -371,6 +397,75 @@
       "ingredientsAr": "Ingredients (Arabic)",
       "storageAr": "Storage (Arabic)",
       "arabicHint": "Shown on the Arabic shop. Leave empty to show the French text there."
+    },
+    "packs": {
+      "title": "Packs",
+      "intro": "Several sizes sold together in one box, for less than buying them one by one.",
+      "new": "New pack",
+      "back": "All packs",
+      "edit": "Edit pack",
+      "empty": "No packs yet. Create one to sell several items together for less.",
+      "name": "Pack",
+      "contents": "In the box",
+      "price": "Price",
+      "status": "Status",
+      "available": "On sale",
+      "featured": "On home page",
+      "saved": "Pack saved",
+      "deleted": "Pack deleted",
+      "delete": "Delete pack",
+      "deleteTitle": "Delete this pack?",
+      "deleteText": "Customers won't see it any more. Past orders keep its name and contents.",
+      "save": "Save changes",
+      "create": "Create pack",
+      "details": "Details",
+      "nameEn": "Name (English)",
+      "nameFr": "Name (French)",
+      "nameAr": "Name (Arabic)",
+      "arabicHint": "Optional. Empty shows the French name in the Arabic shop.",
+      "slug": "URL name",
+      "slugHint": "Lowercase letters, digits and dashes, e.g. breakfast-duo.",
+      "descriptionEn": "Description (English)",
+      "descriptionFr": "Description (French)",
+      "descriptionAr": "Description (Arabic)",
+      "contentsHint": "Choose the sizes that go in the box and how many of each. A pack holds at least 2 items.",
+      "item": "Size",
+      "quantity": "Qty",
+      "addItem": "Add item",
+      "removeItem": "Remove item",
+      "chooseItem": "Choose a size",
+      "units": "{count, plural, one {# item} other {# items}} in the box",
+      "pricing": "Price",
+      "separately": "Items bought separately",
+      "packPrice": "Pack price (DT)",
+      "savingLine": "Customers save {amount} ({percent}%)",
+      "image": "Box photo",
+      "imageHint": "Optional. Without a photo, the shop draws the box with its items' photos.",
+      "uploadImage": "Upload photo",
+      "replaceImage": "Replace photo",
+      "removeImage": "Remove photo",
+      "imageUploaded": "Photo saved",
+      "imageRemoved": "Photo removed",
+      "saveFirst": "Create the pack first, then add a photo.",
+      "visibility": "Visibility",
+      "availableHint": "Shown in the shop and can be ordered.",
+      "featuredHint": "Shown on the home page (the first 3).",
+      "boxesLeft": "{count, plural, =0 {No box left} one {# box left} other {# boxes left}}",
+      "problem": {
+        "item_unavailable": "An item is switched off",
+        "out_of_stock": "Out of stock",
+        "no_saving": "No longer cheaper"
+      },
+      "errors": {
+        "required": "Required",
+        "slug": "Use lowercase letters, digits and dashes",
+        "price": "Enter a price like 19.900",
+        "minItems": "A pack holds at least 2 items",
+        "duplicate": "Each size can appear only once: raise its quantity instead",
+        "chooseItem": "Choose a size",
+        "quantity": "1 to 50",
+        "noSaving": "The pack must cost less than {amount}"
+      }
     },
     "categories": {
       "title": "Categories",

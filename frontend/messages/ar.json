@@ -10,6 +10,7 @@
   "Nav": {
     "shop": "المتجر",
     "allProducts": "كل المنتجات",
+    "packs": "العلب",
     "track": "تتبّع طلبي",
     "cart": "السلة",
     "openMenu": "فتح القائمة",
@@ -64,7 +65,9 @@
     "trustDelivery": "كامل تونس",
     "trustDeliveryText": "الولايات الـ24، حتى معتمديتك.",
     "trustTrack": "تتبّع الطلب",
-    "trustTrackText": "يكفي رمز الطلب ورقم هاتفك لمتابعة التوصيل."
+    "trustTrackText": "يكفي رمز الطلب ورقم هاتفك لمتابعة التوصيل.",
+    "packsTitle": "علب جاهزة",
+    "packsText": "منتجاتنا المفضلة معًا، بسعر أقل."
   },
   "Catalog": {
     "title": "منتجاتنا",
@@ -117,6 +120,21 @@
     "storage": "الحفظ",
     "ingredients": "المكوّنات"
   },
+  "Packs": {
+    "title": "العلب",
+    "intro": "عدة منتجات مفضلة في علبة واحدة، بسعر أقل من شرائها منفردة.",
+    "metaDescription": "علب من معاجين الدهن ومستلزمات الحلويات المرجان، بسعر أقل من شراء كل منتج على حدة.",
+    "itemCount": "{count, plural, one {منتج واحد} two {منتجان} few {# منتجات} other {# منتج}}",
+    "insteadOf": "بدلًا من",
+    "youSave": "توفّر {amount}",
+    "inTheBox": "في العلبة",
+    "boxAlt": "علبة فيها {items}",
+    "boxesLeft": "بقي {count} فقط",
+    "emptyTitle": "لا توجد علب حاليًا",
+    "emptyText": "علب جديدة في الطريق. في الأثناء، كل المنتجات متوفرة في المتجر.",
+    "seeAll": "كل العلب",
+    "itemPrice": "{price} للقطعة"
+  },
   "Cart": {
     "title": "سلتك",
     "empty": "سلتك فارغة",
@@ -138,7 +156,13 @@
     "deliveryChooseGovernorate": "اختر الولاية",
     "blockedNotice": "بعض المنتجات لم تعد متوفرة. راجع سلتك للمتابعة.",
     "reviewCart": "مراجعة السلة",
-    "lineSummary": "{quantity} × {name}، {size}"
+    "lineSummary": "{quantity} × {name}، {size}",
+    "packProblem": {
+      "not_found": "لم تعد هذه العلبة معروضة للبيع. يرجى حذفها.",
+      "unavailable": "أحد منتجات هذه العلبة غير متوفر حاليًا. يرجى حذفها.",
+      "insufficient_stock": "بقي {available} علب فقط — تم تعديل الكمية."
+    },
+    "packSummary": "{quantity} × {name}"
   },
   "Checkout": {
     "title": "إتمام الطلب",

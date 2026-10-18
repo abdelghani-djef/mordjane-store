@@ -108,6 +108,23 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                       <div className="text-xs text-muted-foreground">
                         {formatPrice(item.unit_price, locale)}
                       </div>
+                      {item.parts.length > 0 && (
+                        // Staff pack the box from this list.
+                        <div className="mt-1.5 border-s-2 border-honey ps-2 text-xs">
+                          <span className="text-muted-foreground">{t("packContents")}</span>
+                          <ul>
+                            {item.parts.map((part, j) => (
+                              <li key={j}>
+                                {part.quantity} ×{" "}
+                                {locale === "fr" ? part.product_name_fr : part.product_name}{" "}
+                                <span className="text-muted-foreground">
+                                  {formatWeight(part.weight_grams, locale)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{item.quantity}</TableCell>
                     <TableCell className="pr-4 text-right tabular-nums">

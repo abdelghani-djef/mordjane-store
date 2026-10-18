@@ -15,6 +15,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
   const locale = useLocale();
   const links = [
     { href: "/products", label: t("Nav.allProducts") },
+    { href: "/packs", label: t("Nav.packs") },
     ...categories.slice(0, 4).map((c) => ({
       href: `/products?category=${c.slug}`,
       label: localizedName(c, locale),

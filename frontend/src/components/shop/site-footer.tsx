@@ -21,6 +21,11 @@ export function SiteFooter({ categories }: { categories: Category[] }) {
         <nav aria-label={t("Footer.shop")}>
           <h2 className="mb-3 text-base">{t("Footer.shop")}</h2>
           <ul className="space-y-2">
+            <li>
+              <Link href="/packs" className={linkClass}>
+                {t("Nav.packs")}
+              </Link>
+            </li>
             {categories.map((c) => (
               <li key={c.id}>
                 <Link href={`/products?category=${c.slug}`} className={linkClass}>

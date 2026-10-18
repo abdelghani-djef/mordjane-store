@@ -30,6 +30,7 @@ STRINGS: dict[str, dict[str, str]] = {
         # order summary
         "order_heading": "Your order",
         "product": "Product",
+        "in_box": "In the box",
         "qty": "Qty",
         "amount": "Amount",
         "subtotal": "Subtotal",
@@ -87,6 +88,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "vous pouvez passer une nouvelle commande sur notre site.",
         "order_heading": "Votre commande",
         "product": "Produit",
+        "in_box": "Dans la boîte",
         "qty": "Qté",
         "amount": "Montant",
         "subtotal": "Sous-total",
@@ -148,6 +150,7 @@ STRINGS["ar"] = {
     "على موقعنا.",
     "order_heading": "طلبك",
     "product": "المنتج",
+    "in_box": "في العلبة",
     "qty": "الكمية",
     "amount": "المبلغ",
     "subtotal": "المجموع الفرعي",

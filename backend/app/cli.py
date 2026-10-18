@@ -345,7 +345,10 @@ async def _seed_demo() -> None:
     if loaded is None:
         typer.echo("Demo data is already loaded.")
         return
-    typer.echo(f"Loaded {loaded['admins']} demo admin and {loaded['stock']} stock adjustments.")
+    typer.echo(
+        f"Loaded {loaded['admins']} demo admin, {loaded['stock']} stock adjustments "
+        f"and {loaded['packs']} packs."
+    )
 
 
 @cli.command("seed-demo")

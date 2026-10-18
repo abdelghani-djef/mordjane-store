@@ -55,6 +55,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/packs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Packs */
+        get: operations["list_packs_api_packs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/packs/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Pack */
+        get: operations["get_pack_api_packs__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders": {
         parameters: {
             query?: never;
@@ -295,6 +329,61 @@ export interface paths {
         post: operations["upload_variant_image_api_admin_variants__variant_id__image_post"];
         /** Delete Variant Image */
         delete: operations["delete_variant_image_api_admin_variants__variant_id__image_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/packs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Packs */
+        get: operations["list_packs_api_admin_packs_get"];
+        put?: never;
+        /** Create Pack */
+        post: operations["create_pack_api_admin_packs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/packs/{pack_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Pack */
+        get: operations["get_pack_api_admin_packs__pack_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Pack */
+        delete: operations["delete_pack_api_admin_packs__pack_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Pack */
+        patch: operations["update_pack_api_admin_packs__pack_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/packs/{pack_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Pack Image */
+        post: operations["upload_pack_image_api_admin_packs__pack_id__image_post"];
+        /** Delete Pack Image */
+        delete: operations["delete_pack_image_api_admin_packs__pack_id__image_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -551,6 +640,11 @@ export interface components {
         };
         /** Body_upload_category_image_api_admin_categories__category_id__image_post */
         Body_upload_category_image_api_admin_categories__category_id__image_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_upload_pack_image_api_admin_packs__pack_id__image_post */
+        Body_upload_pack_image_api_admin_packs__pack_id__image_post: {
             /** File */
             file: string;
         };
@@ -1038,6 +1132,13 @@ export interface components {
             product_id: number | null;
             /** Variant Id */
             variant_id: number | null;
+            /** Pack Id */
+            pack_id: number | null;
+            /**
+             * Parts
+             * @default []
+             */
+            parts: components["schemas"]["OrderItemPartOut"][];
             /** Product Name */
             product_name: string;
             /** Product Name Fr */
@@ -1053,10 +1154,33 @@ export interface components {
             /** Line Total */
             line_total: string;
         };
-        /** OrderLineIn */
+        /**
+         * OrderItemPartOut
+         * @description One size inside an ordered pack; `quantity` is per box.
+         */
+        OrderItemPartOut: {
+            /** Variant Id */
+            variant_id: number | null;
+            /** Product Name */
+            product_name: string;
+            /** Product Name Fr */
+            product_name_fr: string;
+            /** Product Name Ar */
+            product_name_ar: string | null;
+            /** Weight Grams */
+            weight_grams: number | null;
+            /** Quantity */
+            quantity: number;
+        };
+        /**
+         * OrderLineIn
+         * @description One size (`variant_id`) or one pack (`pack_id`), never both.
+         */
         OrderLineIn: {
             /** Variant Id */
-            variant_id: number;
+            variant_id?: number | null;
+            /** Pack Id */
+            pack_id?: number | null;
             /** Quantity */
             quantity: number;
         };
@@ -1117,6 +1241,199 @@ export interface components {
             items: components["schemas"]["OrderItemOut"][];
             /** Events */
             events: components["schemas"]["PublicStatusEventOut"][];
+        };
+        /** PackAdminItemOut */
+        PackAdminItemOut: {
+            /** Quantity */
+            quantity: number;
+            variant: components["schemas"]["VariantAdminOut"];
+            product: components["schemas"]["PackProductOut"];
+        };
+        /** PackAdminOut */
+        PackAdminOut: {
+            /** Id */
+            id: number;
+            /** Slug */
+            slug: string;
+            /** Name En */
+            name_en: string;
+            /** Name Fr */
+            name_fr: string;
+            /** Name Ar */
+            name_ar: string | null;
+            /** Description En */
+            description_en: string;
+            /** Description Fr */
+            description_fr: string;
+            /** Description Ar */
+            description_ar: string;
+            /** Price */
+            price: string;
+            /** Regular Price */
+            regular_price: string;
+            /** In Stock */
+            in_stock: boolean;
+            /** Boxes Left */
+            boxes_left: number;
+            /** Is Featured */
+            is_featured: boolean;
+            /** Items */
+            items: components["schemas"]["PackAdminItemOut"][];
+            /** Is Available */
+            is_available: boolean;
+            /** Sort Order */
+            sort_order: number;
+            /** Problem */
+            problem: ("item_unavailable" | "out_of_stock" | "no_saving") | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Image Url */
+            readonly image_url: string | null;
+        };
+        /** PackIn */
+        PackIn: {
+            /** Name Ar */
+            name_ar?: string | null;
+            /**
+             * Description En
+             * @default
+             */
+            description_en: string;
+            /**
+             * Description Fr
+             * @default
+             */
+            description_fr: string;
+            /**
+             * Description Ar
+             * @default
+             */
+            description_ar: string;
+            /**
+             * Is Available
+             * @default true
+             */
+            is_available: boolean;
+            /**
+             * Is Featured
+             * @default false
+             */
+            is_featured: boolean;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /** Slug */
+            slug: string;
+            /** Name En */
+            name_en: string;
+            /** Name Fr */
+            name_fr: string;
+            /** Price */
+            price: number | string;
+            /** Items */
+            items: components["schemas"]["PackItemIn"][];
+        };
+        /** PackItemIn */
+        PackItemIn: {
+            /** Variant Id */
+            variant_id: number;
+            /** Quantity */
+            quantity: number;
+        };
+        /** PackItemOut */
+        PackItemOut: {
+            /** Quantity */
+            quantity: number;
+            variant: components["schemas"]["VariantDetailOut"];
+            product: components["schemas"]["PackProductOut"];
+        };
+        /** PackOut */
+        PackOut: {
+            /** Id */
+            id: number;
+            /** Slug */
+            slug: string;
+            /** Name En */
+            name_en: string;
+            /** Name Fr */
+            name_fr: string;
+            /** Name Ar */
+            name_ar: string | null;
+            /** Description En */
+            description_en: string;
+            /** Description Fr */
+            description_fr: string;
+            /** Description Ar */
+            description_ar: string;
+            /** Price */
+            price: string;
+            /** Regular Price */
+            regular_price: string;
+            /** In Stock */
+            in_stock: boolean;
+            /** Boxes Left */
+            boxes_left: number;
+            /** Is Featured */
+            is_featured: boolean;
+            /** Items */
+            items: components["schemas"]["PackItemOut"][];
+            /** Image Url */
+            readonly image_url: string | null;
+        };
+        /** PackPatch */
+        PackPatch: {
+            /** Slug */
+            slug?: string | null;
+            /** Name En */
+            name_en?: string | null;
+            /** Name Fr */
+            name_fr?: string | null;
+            /** Name Ar */
+            name_ar?: string | null;
+            /** Description En */
+            description_en?: string | null;
+            /** Description Fr */
+            description_fr?: string | null;
+            /** Description Ar */
+            description_ar?: string | null;
+            /** Price */
+            price?: number | string | null;
+            /** Items */
+            items?: components["schemas"]["PackItemIn"][] | null;
+            /** Is Available */
+            is_available?: boolean | null;
+            /** Is Featured */
+            is_featured?: boolean | null;
+            /** Sort Order */
+            sort_order?: number | null;
+        };
+        /**
+         * PackProductOut
+         * @description The product a pack item belongs to: enough to name it and link to it.
+         */
+        PackProductOut: {
+            /** Id */
+            id: number;
+            /** Slug */
+            slug: string;
+            /** Name En */
+            name_en: string;
+            /** Name Fr */
+            name_fr: string;
+            /** Name Ar */
+            name_ar: string | null;
+            /** Image Url */
+            readonly image_url: string | null;
         };
         /** Page[OrderSummaryOut] */
         Page_OrderSummaryOut_: {
@@ -1438,10 +1755,15 @@ export interface components {
             /** Note */
             note: string;
         };
-        /** StockProblem */
+        /**
+         * StockProblem
+         * @description Why one line of the cart can't be bought: names the size or the pack it is about.
+         */
         StockProblem: {
             /** Variant Id */
-            variant_id: number;
+            variant_id?: number | null;
+            /** Pack Id */
+            pack_id?: number | null;
             /** Reason */
             reason: string;
             /**
@@ -1640,6 +1962,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_packs_api_packs_get: {
+        parameters: {
+            query?: {
+                featured?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_pack_api_packs__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackOut"];
                 };
             };
             /** @description Validation Error */
@@ -2355,6 +2739,243 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_packs_api_admin_packs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_pack_api_admin_packs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_pack_api_admin_packs__pack_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pack_id: number;
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_pack_api_admin_packs__pack_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pack_id: number;
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_pack_api_admin_packs__pack_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pack_id: number;
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_pack_image_api_admin_packs__pack_id__image_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pack_id: number;
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_pack_image_api_admin_packs__pack_id__image_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_pack_image_api_admin_packs__pack_id__image_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pack_id: number;
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackAdminOut"];
                 };
             };
             /** @description Validation Error */

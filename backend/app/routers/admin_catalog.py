@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db import get_session
 from app.media import delete_image, save_image
-from app.models import Category, OrderItem, Product, ProductVariant
+from app.models import Category, OrderItem, OrderItemPart, Pack, PackItem, Product, ProductVariant
 from app.schemas.catalog import (
     CategoryAdminOut,
     CategoryIn,
@@ -120,6 +120,22 @@ async def upload_category_image(category_id: int, file: UploadFile, session: Ses
 # --- products -----------------------------------------------------------------------------
 
 
+async def _pack_holding(session: AsyncSession, *conditions) -> str | None:
+    """Name of a pack containing the given sizes, if any (they can't be deleted then)."""
+    return await session.scalar(
+        select(Pack.name_en).join(PackItem.pack).join(PackItem.variant).where(*conditions).limit(1)
+    )
+
+
+async def _in_pack_conflict(session: AsyncSession, *conditions) -> None:
+    name = await _pack_holding(session, *conditions)
+    if name:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"This size is in the pack «{name}»; remove it from the pack first",
+        )
+
+
 async def _ensure_category(session: AsyncSession, category_id: int | None) -> None:
     if category_id is not None and await session.get(Category, category_id) is None:
         raise HTTPException(422, "Category does not exist")
@@ -224,12 +240,19 @@ async def update_product(product_id: int, data: ProductPatch, session: Session):
 @router.delete("/products/{product_id}", status_code=204)
 async def delete_product(product_id: int, session: Session):
     product = await _get_product(session, product_id)
-    ordered = await session.scalar(select(OrderItem.id).where(OrderItem.product_id == product_id))
+    ordered = await session.scalar(
+        select(OrderItem.id).where(OrderItem.product_id == product_id)
+    ) or await session.scalar(
+        select(OrderItemPart.id)
+        .join(ProductVariant, OrderItemPart.variant_id == ProductVariant.id)
+        .where(ProductVariant.product_id == product_id)
+    )
     if ordered:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             "Product appears in past orders; mark it unavailable instead of deleting it",
         )
+    await _in_pack_conflict(session, ProductVariant.product_id == product_id)
     # Its sizes go with it (cascade), so collect their photos before the rows are gone.
     size_images = (
         await session.scalars(
@@ -314,11 +337,16 @@ async def update_variant(variant_id: int, data: VariantPatch, session: Session):
 async def delete_variant(variant_id: int, session: Session):
     variant = await _get_variant(session, variant_id)
     product_id = variant.product_id
-    if await session.scalar(select(OrderItem.id).where(OrderItem.variant_id == variant_id)):
+    if await session.scalar(
+        select(OrderItem.id).where(OrderItem.variant_id == variant_id)
+    ) or await session.scalar(
+        select(OrderItemPart.id).where(OrderItemPart.variant_id == variant_id)
+    ):
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             "This size appears in past orders; switch it off instead of deleting it",
         )
+    await _in_pack_conflict(session, PackItem.variant_id == variant_id)
     siblings = await session.scalar(
         select(func.count()).where(ProductVariant.product_id == product_id)
     )

@@ -36,6 +36,13 @@ PNG_1PX = bytes.fromhex(
         ("post", "/api/admin/delivery-cities/1/delegations"),
         ("patch", "/api/admin/delegations/1"),
         ("delete", "/api/admin/delegations/1"),
+        ("get", "/api/admin/packs"),
+        ("post", "/api/admin/packs"),
+        ("get", "/api/admin/packs/1"),
+        ("patch", "/api/admin/packs/1"),
+        ("delete", "/api/admin/packs/1"),
+        ("post", "/api/admin/packs/1/image"),
+        ("delete", "/api/admin/packs/1/image"),
     ],
 )
 async def test_admin_endpoints_require_auth(client, method, path):

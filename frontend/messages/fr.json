@@ -10,6 +10,7 @@
   "Nav": {
     "shop": "Boutique",
     "allProducts": "Tous les produits",
+    "packs": "Packs",
     "track": "Suivre ma commande",
     "cart": "Panier",
     "openMenu": "Ouvrir le menu",
@@ -64,7 +65,9 @@
     "trustDelivery": "Toute la Tunisie",
     "trustDeliveryText": "Les 24 gouvernorats, jusqu'à votre délégation.",
     "trustTrack": "Suivi de commande",
-    "trustTrackText": "Votre code et votre numéro suffisent pour suivre la livraison."
+    "trustTrackText": "Votre code et votre numéro suffisent pour suivre la livraison.",
+    "packsTitle": "Boîtes toutes prêtes",
+    "packsText": "Nos favoris réunis, moins cher."
   },
   "Catalog": {
     "title": "Nos produits",
@@ -117,6 +120,21 @@
     "storage": "Stockage",
     "ingredients": "Composition"
   },
+  "Packs": {
+    "title": "Packs",
+    "intro": "Plusieurs favoris dans une même boîte, moins cher qu'à l'unité.",
+    "metaDescription": "Des boîtes de pâtes à tartiner et d'ingrédients de pâtisserie El Mordjene, moins chères qu'à l'unité.",
+    "itemCount": "{count, plural, one {# article} other {# articles}}",
+    "insteadOf": "au lieu de",
+    "youSave": "Vous économisez {amount}",
+    "inTheBox": "Dans la boîte",
+    "boxAlt": "Boîte avec {items}",
+    "boxesLeft": "Plus que {count, plural, one {# boîte} other {# boîtes}}",
+    "emptyTitle": "Aucun pack pour le moment",
+    "emptyText": "De nouvelles boîtes arrivent bientôt. En attendant, tous les articles sont en boutique.",
+    "seeAll": "Tous les packs",
+    "itemPrice": "{price} l'unité"
+  },
   "Cart": {
     "title": "Votre panier",
     "empty": "Votre panier est vide",
@@ -138,7 +156,13 @@
     "deliveryChooseGovernorate": "Choisissez un gouvernorat",
     "blockedNotice": "Certains articles ne sont plus disponibles. Vérifiez votre panier pour continuer.",
     "reviewCart": "Vérifier le panier",
-    "lineSummary": "{quantity} × {name}, {size}"
+    "lineSummary": "{quantity} × {name}, {size}",
+    "packProblem": {
+      "not_found": "Ce pack n'est plus vendu. Retirez-le, s'il vous plaît.",
+      "unavailable": "Un article de ce pack est indisponible pour le moment. Retirez-le, s'il vous plaît.",
+      "insufficient_stock": "Plus que {available} boîtes — quantité ajustée."
+    },
+    "packSummary": "{quantity} × {name}"
   },
   "Checkout": {
     "title": "Commande",
@@ -224,6 +248,7 @@
       "dashboard": "Tableau de bord",
       "orders": "Commandes",
       "products": "Produits",
+      "packs": "Packs",
       "categories": "Catégories",
       "delivery": "Zones de livraison",
       "notifications": "Notifications"
@@ -282,7 +307,8 @@
         "en": "Commande passée en anglais",
         "fr": "Commande passée en français",
         "ar": "Commande passée en arabe"
-      }
+      },
+      "packContents": "Dans chaque boîte"
     },
     "products": {
       "title": "Produits",
@@ -371,6 +397,75 @@
       "ingredientsAr": "Composition (arabe)",
       "storageAr": "Stockage (arabe)",
       "arabicHint": "Affiché sur la boutique en arabe. Laissez vide pour y afficher le texte français."
+    },
+    "packs": {
+      "title": "Packs",
+      "intro": "Plusieurs formats vendus ensemble dans une boîte, moins cher qu'à l'unité.",
+      "new": "Nouveau pack",
+      "back": "Tous les packs",
+      "edit": "Modifier le pack",
+      "empty": "Aucun pack pour l'instant. Créez-en un pour vendre plusieurs articles ensemble, moins cher.",
+      "name": "Pack",
+      "contents": "Dans la boîte",
+      "price": "Prix",
+      "status": "État",
+      "available": "En vente",
+      "featured": "En page d'accueil",
+      "saved": "Pack enregistré",
+      "deleted": "Pack supprimé",
+      "delete": "Supprimer le pack",
+      "deleteTitle": "Supprimer ce pack ?",
+      "deleteText": "Les clients ne le verront plus. Les commandes passées gardent son nom et son contenu.",
+      "save": "Enregistrer",
+      "create": "Créer le pack",
+      "details": "Informations",
+      "nameEn": "Nom (anglais)",
+      "nameFr": "Nom (français)",
+      "nameAr": "Nom (arabe)",
+      "arabicHint": "Facultatif. Vide, la boutique arabe affiche le nom français.",
+      "slug": "Nom dans l'URL",
+      "slugHint": "Minuscules, chiffres et tirets, par ex. duo-petit-dejeuner.",
+      "descriptionEn": "Description (anglais)",
+      "descriptionFr": "Description (français)",
+      "descriptionAr": "Description (arabe)",
+      "contentsHint": "Choisissez les formats qui vont dans la boîte et leur quantité. Un pack contient au moins 2 articles.",
+      "item": "Format",
+      "quantity": "Qté",
+      "addItem": "Ajouter un article",
+      "removeItem": "Retirer l'article",
+      "chooseItem": "Choisir un format",
+      "units": "{count, plural, one {# article} other {# articles}} dans la boîte",
+      "pricing": "Prix",
+      "separately": "Articles achetés séparément",
+      "packPrice": "Prix du pack (DT)",
+      "savingLine": "Les clients économisent {amount} ({percent} %)",
+      "image": "Photo de la boîte",
+      "imageHint": "Facultatif. Sans photo, la boutique dessine la boîte avec les photos de ses articles.",
+      "uploadImage": "Ajouter une photo",
+      "replaceImage": "Remplacer la photo",
+      "removeImage": "Retirer la photo",
+      "imageUploaded": "Photo enregistrée",
+      "imageRemoved": "Photo retirée",
+      "saveFirst": "Créez d'abord le pack, puis ajoutez une photo.",
+      "visibility": "Visibilité",
+      "availableHint": "Affiché en boutique et disponible à la commande.",
+      "featuredHint": "Affiché en page d'accueil (les 3 premiers).",
+      "boxesLeft": "{count, plural, =0 {Plus aucune boîte} one {# boîte restante} other {# boîtes restantes}}",
+      "problem": {
+        "item_unavailable": "Un article est désactivé",
+        "out_of_stock": "En rupture",
+        "no_saving": "N'est plus moins cher"
+      },
+      "errors": {
+        "required": "Obligatoire",
+        "slug": "Minuscules, chiffres et tirets uniquement",
+        "price": "Saisissez un prix comme 19.900",
+        "minItems": "Un pack contient au moins 2 articles",
+        "duplicate": "Chaque format une seule fois : augmentez plutôt sa quantité",
+        "chooseItem": "Choisissez un format",
+        "quantity": "De 1 à 50",
+        "noSaving": "Le pack doit coûter moins de {amount}"
+      }
     },
     "categories": {
       "title": "Catégories",

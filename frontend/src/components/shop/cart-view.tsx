@@ -3,7 +3,12 @@
 import { AlertTriangleIcon, ShoppingBagIcon, Trash2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { ProductImage } from "@/components/shop/product-image";
+import {
+  LineDetail,
+  LineThumb,
+  useLineSummary,
+  useProblemText,
+} from "@/components/shop/cart-line-parts";
 import { QuantityStepper } from "@/components/shop/quantity-stepper";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,10 +22,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
-import { formatPrice, formatWeight } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import {
   cartSubtotal,
   hasBlockedLines,
+  lineHref,
   lineName,
   useCart,
   useHydrated,
@@ -67,7 +73,7 @@ export function CartView() {
     <div className="grid items-start gap-8 lg:grid-cols-[1fr_22rem]">
       <ul className="divide-y rounded-2xl border bg-card">
         {lines.map((line) => (
-          <CartLineRow key={line.variantId} line={line} />
+          <CartLineRow key={line.key} line={line} />
         ))}
       </ul>
       <OrderSummary lines={lines} deliveryFee={null} deliveryNote={t("deliveryAtCheckout")}>
@@ -92,34 +98,25 @@ function CartLineRow({ line }: { line: CartLine }) {
   const locale = useLocale();
   const setQuantity = useCart((s) => s.setQuantity);
   const remove = useCart((s) => s.remove);
+  const problemText = useProblemText();
   const name = lineName(line, locale);
+  const href = lineHref(line);
 
   return (
     <li className="flex gap-4 p-4 sm:p-5">
-      <Link href={`/products/${line.slug}`} className="shrink-0" tabIndex={-1} aria-hidden>
-        <ProductImage
-          imageUrl={line.imageUrl}
-          alt={name}
-          hint={`${line.categorySlug ?? ""} ${line.slug}`}
-          seed={line.productId}
-          grams={line.weightGrams}
-          sizes="112px"
-          className="size-24 rounded-xl sm:size-28"
-        />
+      <Link href={href} className="shrink-0" tabIndex={-1} aria-hidden>
+        <LineThumb line={line} sizes="112px" className="size-24 rounded-xl sm:size-28" />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <Link
-              href={`/products/${line.slug}`}
+              href={href}
               className="font-heading text-lg leading-snug font-medium hover:underline"
             >
               {name}
             </Link>
-            <p className="text-sm text-muted-foreground">
-              {formatPrice(line.price, locale)}
-              {` / ${formatWeight(line.weightGrams, locale)}`}
-            </p>
+            <LineDetail line={line} />
           </div>
           <span className="price shrink-0 text-lg font-semibold">
             {formatPrice(Number(line.price) * line.quantity, locale)}
@@ -128,24 +125,19 @@ function CartLineRow({ line }: { line: CartLine }) {
         {line.problem && (
           <p className="flex items-start gap-2 text-sm text-destructive" role="alert">
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
-            {t(
-              `problem.${line.problem.reason as "not_found" | "unavailable" | "insufficient_stock"}`,
-              {
-                available: line.problem.available ?? 0,
-              },
-            )}
+            {problemText(line)}
           </p>
         )}
         <div className="mt-auto flex items-center justify-between">
           <QuantityStepper
             value={line.quantity}
             max={Math.max(1, line.maxQuantity ?? 99)}
-            onChange={(q) => setQuantity(line.variantId, q)}
+            onChange={(q) => setQuantity(line.key, q)}
           />
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => remove(line.variantId)}
+            onClick={() => remove(line.key)}
             className="text-muted-foreground"
           >
             <Trash2Icon /> {t("remove")}
@@ -172,6 +164,7 @@ export function OrderSummary({
 }) {
   const t = useTranslations("Cart");
   const locale = useLocale();
+  const lineSummary = useLineSummary();
   const subtotal = cartSubtotal(lines);
 
   return (
@@ -179,14 +172,8 @@ export function OrderSummary({
       {compact && (
         <ul className="flex flex-col gap-2 text-sm">
           {lines.map((l) => (
-            <li key={l.variantId} className="flex justify-between gap-3">
-              <span className="min-w-0 truncate text-foreground/85">
-                {t("lineSummary", {
-                  quantity: l.quantity,
-                  name: lineName(l, locale),
-                  size: formatWeight(l.weightGrams, locale) ?? "",
-                })}
-              </span>
+            <li key={l.key} className="flex justify-between gap-3">
+              <span className="min-w-0 truncate text-foreground/85">{lineSummary(l)}</span>
               <span className="tabular-nums">
                 {formatPrice(Number(l.price) * l.quantity, locale)}
               </span>

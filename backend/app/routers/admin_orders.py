@@ -31,7 +31,9 @@ async def _load_order(session: AsyncSession, order_id: int) -> OrderAdminOut:
     order = await session.scalar(
         select(Order)
         .where(Order.id == order_id)
-        .options(selectinload(Order.items), selectinload(Order.events))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.parts), selectinload(Order.events)
+        )
         .execution_options(populate_existing=True)
     )
     if order is None:

@@ -26,6 +26,7 @@ from app.models import (
     DeliveryCity,
     NotificationSettings,
     Order,
+    OrderItem,
     OrderStatus,
     ProductVariant,
 )
@@ -99,7 +100,9 @@ async def _load_order(session: AsyncSession, order_id: int) -> Order | None:
     return await session.scalar(
         select(Order)
         .where(Order.id == order_id)
-        .options(selectinload(Order.items), selectinload(Order.events))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.parts), selectinload(Order.events)
+        )
     )
 
 

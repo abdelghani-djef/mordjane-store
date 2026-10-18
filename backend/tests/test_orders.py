@@ -44,7 +44,9 @@ async def test_oversell_is_rejected_without_touching_stock(client, session, cata
     r = await client.post("/api/orders", json=order_payload((dark.id, 1), (almonds.id, 6)))
     assert r.status_code == 409
     problems = r.json()["problems"]
-    assert problems == [{"variant_id": almonds.id, "reason": "insufficient_stock", "available": 5}]
+    assert problems == [
+        {"variant_id": almonds.id, "pack_id": None, "reason": "insufficient_stock", "available": 5}
+    ]
     assert await _stock(session, dark.id) == 10
     assert await session.scalar(select(Order.id)) is None
 

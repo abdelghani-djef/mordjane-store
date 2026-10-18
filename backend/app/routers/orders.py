@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db import get_session
-from app.models import Order
+from app.models import Order, OrderItem
 from app.schemas.orders import (
     OrderConflictOut,
     OrderCreatedOut,
@@ -70,7 +70,9 @@ async def track_order(
     order = await session.scalar(
         select(Order)
         .where(Order.code == code.strip().upper(), Order.phone == normalize_phone(phone))
-        .options(selectinload(Order.items), selectinload(Order.events))
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.parts), selectinload(Order.events)
+        )
     )
     if order is None:
         raise HTTPException(404, "Order not found")

@@ -7,7 +7,7 @@ import { HeroScroll } from "@/components/home/hero-scroll";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
-export type HeroPacks = { jar: string; bucket: string; label: string };
+export type HeroSizes = { jar: string; bucket: string; label: string };
 
 /**
  * The headline beside an arch holding the smallest and the biggest size of one spread. Scrolling
@@ -16,11 +16,11 @@ export type HeroPacks = { jar: string; bucket: string; label: string };
 export async function HomeHero({
   spreads,
   rocher,
-  packs,
+  sizes,
 }: {
   spreads: string;
   rocher: string;
-  packs: HeroPacks | null;
+  sizes: HeroSizes | null;
 }) {
   const t = await getTranslations("Home");
   return (
@@ -56,8 +56,8 @@ export async function HomeHero({
           </ul>
         </div>
 
-        {packs ? (
-          <HeroArch packs={packs} />
+        {sizes ? (
+          <HeroArch sizes={sizes} />
         ) : (
           <div className="mx-auto w-full max-w-md">
             <HeroSpreadArt label={t("heroArtFallback")} />
@@ -68,11 +68,11 @@ export async function HomeHero({
   );
 }
 
-function HeroArch({ packs }: { packs: HeroPacks }) {
+function HeroArch({ sizes }: { sizes: HeroSizes }) {
   return (
     <div
       role="img"
-      aria-label={packs.label}
+      aria-label={sizes.label}
       className="hero-arch relative mx-auto w-full max-w-sm sm:max-w-md lg:max-w-[30rem]"
     >
       <div className="home-open niche aspect-[5/6]">
@@ -81,12 +81,12 @@ function HeroArch({ packs }: { packs: HeroPacks }) {
         {/*
           Photos are shot on white and multiplied onto the niche. The blend sits on the outer
           (moving) wrapper: a transformed element is its own layer, so a blend inside it would
-          only mix with that empty layer. Side by side, the packs never overlap each other.
+          only mix with that empty layer. Side by side, the jar and bucket never overlap.
         */}
         <div className="hero-large absolute start-[2%] bottom-[3%] aspect-square w-[68%] mix-blend-multiply">
           <div className="home-drop relative size-full [--delay:150ms]">
             <Image
-              src={packs.bucket}
+              src={sizes.bucket}
               alt=""
               fill
               preload
@@ -98,7 +98,7 @@ function HeroArch({ packs }: { packs: HeroPacks }) {
         <div className="hero-small absolute end-[2%] bottom-[3%] aspect-square w-[42%] mix-blend-multiply">
           <div className="home-drop relative size-full [--delay:340ms]">
             <Image
-              src={packs.jar}
+              src={sizes.jar}
               alt=""
               fill
               preload

@@ -149,6 +149,93 @@ class ProductVariant(TimestampMixin, Base):
     def in_stock(self) -> bool:
         return self.is_available and self.stock > 0
 
+    @property
+    def sellable(self) -> bool:
+        """The size and its product are both switched on (stock aside)."""
+        return self.is_available and self.product.is_available
+
+
+class Pack(TimestampMixin, Base):
+    """Several sizes sold together in one box, for less than buying them one by one.
+
+    A pack has no stock of its own: each box takes its items from the sizes' stock.
+    """
+
+    __tablename__ = "packs"
+    __table_args__ = (CheckConstraint("price >= 0", name="price_non_negative"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String(160), unique=True)
+    name_en: Mapped[str] = mapped_column(String(160))
+    name_fr: Mapped[str] = mapped_column(String(160))
+    name_ar: Mapped[str | None] = mapped_column(String(160))
+    description_en: Mapped[str] = mapped_column(Text, default="")
+    description_fr: Mapped[str] = mapped_column(Text, default="")
+    description_ar: Mapped[str] = mapped_column(Text, default="")
+    price: Mapped[Decimal] = mapped_column(Money)
+    # Photo of the box; without one the shop draws the box from its items' photos.
+    image_path: Mapped[str | None] = mapped_column(String(255))
+    is_available: Mapped[bool] = mapped_column(default=True)
+    is_featured: Mapped[bool] = mapped_column(default=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    items: Mapped[list[PackItem]] = relationship(
+        back_populates="pack", cascade="all, delete-orphan", order_by="PackItem.id"
+    )
+
+    # These read items → variant → product: load them (selectinload) before serialising.
+    @property
+    def regular_price(self) -> Decimal:
+        """What the items cost bought separately (the struck-through price)."""
+        return sum((i.variant.price * i.quantity for i in self.items), Decimal("0.000"))
+
+    @property
+    def boxes_left(self) -> int:
+        """How many boxes the sizes' stock can still fill."""
+        if not self.items or not all(i.variant.sellable for i in self.items):
+            return 0
+        return min(i.variant.stock // i.quantity for i in self.items)
+
+    @property
+    def in_stock(self) -> bool:
+        return self.is_available and self.boxes_left > 0
+
+    @property
+    def problem(self) -> str | None:
+        """For the admin list: why customers can't buy it, or why it no longer saves money."""
+        if not all(i.variant.sellable for i in self.items):
+            return "item_unavailable"
+        if self.boxes_left == 0:
+            return "out_of_stock"
+        if self.price >= self.regular_price:
+            return "no_saving"
+        return None
+
+
+class PackItem(Base):
+    """One size in a pack, and how many of it go in the box."""
+
+    __tablename__ = "pack_items"
+    __table_args__ = (
+        CheckConstraint("quantity > 0", name="quantity_positive"),
+        UniqueConstraint("pack_id", "variant_id", name="uq_pack_item_size"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    pack_id: Mapped[int] = mapped_column(ForeignKey("packs.id", ondelete="CASCADE"), index=True)
+    # RESTRICT: a size can't be deleted while a pack still contains it.
+    variant_id: Mapped[int] = mapped_column(
+        ForeignKey("product_variants.id", ondelete="RESTRICT"), index=True
+    )
+    quantity: Mapped[int] = mapped_column(Integer)
+
+    pack: Mapped[Pack] = relationship(back_populates="items")
+    variant: Mapped[ProductVariant] = relationship()
+
+    @property
+    def product(self) -> Product:
+        return self.variant.product
+
 
 class Order(TimestampMixin, Base):
     __tablename__ = "orders"
@@ -200,6 +287,10 @@ class OrderItem(Base):
     variant_id: Mapped[int | None] = mapped_column(
         ForeignKey("product_variants.id", ondelete="SET NULL"), index=True
     )
+    # Set on a pack line (then product_id/variant_id are empty and the names are the pack's).
+    pack_id: Mapped[int | None] = mapped_column(
+        ForeignKey("packs.id", ondelete="SET NULL"), index=True
+    )
     # Snapshots so later catalog edits never rewrite past orders.
     product_name: Mapped[str] = mapped_column(String(160))
     product_name_fr: Mapped[str] = mapped_column(String(160))
@@ -210,6 +301,34 @@ class OrderItem(Base):
     line_total: Mapped[Decimal] = mapped_column(Money)
 
     order: Mapped[Order] = relationship(back_populates="items")
+    # What was in the box, for pack lines (empty otherwise).
+    parts: Mapped[list[OrderItemPart]] = relationship(
+        back_populates="item", cascade="all, delete-orphan", order_by="OrderItemPart.id"
+    )
+
+
+class OrderItemPart(Base):
+    """One size inside an ordered pack, snapshotted so editing the pack never rewrites the order
+    and cancelling puts back exactly what was taken."""
+
+    __tablename__ = "order_item_parts"
+    __table_args__ = (CheckConstraint("quantity > 0", name="quantity_positive"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_item_id: Mapped[int] = mapped_column(
+        ForeignKey("order_items.id", ondelete="CASCADE"), index=True
+    )
+    variant_id: Mapped[int | None] = mapped_column(
+        ForeignKey("product_variants.id", ondelete="SET NULL"), index=True
+    )
+    product_name: Mapped[str] = mapped_column(String(160))
+    product_name_fr: Mapped[str] = mapped_column(String(160))
+    product_name_ar: Mapped[str | None] = mapped_column(String(160))
+    weight_grams: Mapped[int | None] = mapped_column(Integer)
+    # Units per box; the order took this × the line's quantity.
+    quantity: Mapped[int] = mapped_column(Integer)
+
+    item: Mapped[OrderItem] = relationship(back_populates="parts")
 
 
 class OrderStatusEvent(Base):

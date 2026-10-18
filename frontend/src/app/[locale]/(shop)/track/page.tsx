@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import type { DeliveryCity, OrderTrack } from "@/lib/api";
+import type { DeliveryCity, OrderItem, OrderTrack } from "@/lib/api";
+import { contentsText } from "@/lib/packs";
 import {
   deliveryArea,
   formatDateTime,
@@ -64,12 +65,28 @@ export default async function TrackPage({ params, searchParams }: PageProps<"/[l
     code && phone ? await serverApiOrNull<OrderTrack>("/orders/track", { code, phone }) : null;
   const searched = Boolean(code && phone);
   const area = order ? await orderArea(order, locale) : null;
-  const itemName = (item: OrderTrack["items"][number]) =>
+  const itemName = (item: Pick<OrderItem, "product_name" | "product_name_fr" | "product_name_ar">) =>
     localizedText(locale, {
       en: item.product_name,
       fr: item.product_name_fr,
       ar: item.product_name_ar,
     });
+  const tPacks = await getTranslations("Packs");
+  // What was in an ordered pack, written like the shop writes a pack's contents.
+  const partsText = (item: OrderItem) =>
+    contentsText(
+      item.parts.map((part) => ({
+        productId: part.variant_id ?? 0,
+        slug: "",
+        nameEn: part.product_name,
+        nameFr: part.product_name_fr,
+        nameAr: part.product_name_ar,
+        weightGrams: part.weight_grams ?? 0,
+        imageUrl: null,
+        quantity: part.quantity,
+      })),
+      locale,
+    );
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -162,8 +179,13 @@ export default async function TrackPage({ params, searchParams }: PageProps<"/[l
                             name: itemName(item),
                             size: formatWeight(item.weight_grams, locale) ?? "",
                           })
-                        : // Orders placed before sizes existed have no weight.
+                        : // Packs, and orders placed before sizes existed, have no weight.
                           `${item.quantity} × ${itemName(item)}`}
+                      {item.parts.length > 0 && (
+                        <span className="block text-xs text-muted-foreground">
+                          {tPacks("inTheBox")}: {partsText(item)}
+                        </span>
+                      )}
                     </span>
                     <span className="tabular-nums">{formatPrice(item.line_total, locale)}</span>
                   </li>

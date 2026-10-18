@@ -1,11 +1,12 @@
 import { BanknoteIcon, MapPinnedIcon, PackageSearchIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { HomeHero, type HeroPacks } from "@/components/home/hero";
+import { FeaturedPacks } from "@/components/home/featured-packs";
+import { HomeHero, type HeroSizes } from "@/components/home/hero";
 import { HomeShelves } from "@/components/home/shelves";
 import { SizeStory, type StoryBand, type StoryStep } from "@/components/home/size-story";
 import { resolveLocale } from "@/i18n/locale";
-import type { Category, Product, ProductPage } from "@/lib/api";
+import type { Category, Pack, Product, ProductPage } from "@/lib/api";
 import { formatWeight, localizedName } from "@/lib/format";
 import { serverApi } from "@/lib/server-api";
 
@@ -50,9 +51,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = await resolveLocale(params);
   const t = await getTranslations("Home");
 
-  const [categories, catalog] = await Promise.all([
+  const [categories, catalog, featuredPacks] = await Promise.all([
     serverApi<Category[]>("/categories"),
     serverApi<ProductPage>("/products", { page_size: 60 }),
+    serverApi<Pack[]>("/packs", { featured: true }),
   ]);
   const spreads = findSlug(categories, /spread|tartin/, "spreads");
   const rocher = findSlug(categories, /rocher|crunch/, "rocher");
@@ -71,7 +73,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   const smallest = story?.sizes[0];
   const largest = story?.sizes.at(-1);
-  const packs: HeroPacks | null =
+  const heroSizes: HeroSizes | null =
     smallest && largest
       ? {
           jar: smallest.image_url!,
@@ -86,7 +88,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      <HomeHero spreads={spreads} rocher={rocher} packs={packs} />
+      <HomeHero spreads={spreads} rocher={rocher} sizes={heroSizes} />
+      <FeaturedPacks packs={featuredPacks} />
       <HomeShelves categories={categories} products={catalog.items} locale={locale} />
       {story && (
         <div className="mt-24">

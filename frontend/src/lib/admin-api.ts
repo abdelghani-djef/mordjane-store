@@ -27,6 +27,9 @@ import {
   type OrderAdmin,
   type OrderStatus,
   type OrderSummaryPage,
+  type PackAdmin,
+  type PackIn,
+  type PackPatch,
   type ProductAdmin,
   type ProductAdminPage,
   type ProductIn,
@@ -42,6 +45,8 @@ export const adminKeys = {
   order: (id: number) => ["admin", "order", id] as const,
   products: (filters: object) => ["admin", "products", filters] as const,
   product: (id: number) => ["admin", "product", id] as const,
+  packs: ["admin", "packs"] as const,
+  pack: (id: number) => ["admin", "pack", id] as const,
   categories: ["admin", "categories"] as const,
   cities: ["admin", "delivery-cities"] as const,
   notifications: ["admin", "notifications"] as const,
@@ -110,7 +115,7 @@ export function useChangeStatus(id: number) {
       api<OrderAdmin>(`/admin/orders/${id}/status`, { method: "POST", json: body }),
     onSuccess: (order) => {
       qc.setQueryData(adminKeys.order(id), order);
-      invalidate(qc, ["admin", "orders"], adminKeys.stats, ["admin", "products"]);
+      invalidate(qc, ["admin", "orders"], adminKeys.stats, ["admin", "products"], adminKeys.packs);
     },
   });
 }
@@ -143,7 +148,8 @@ export function useProduct(id: number | null) {
 
 function onProductChanged(qc: ReturnType<typeof useQueryClient>, product?: ProductAdmin) {
   if (product) qc.setQueryData(adminKeys.product(product.id), product);
-  invalidate(qc, ["admin", "products"], adminKeys.stats, adminKeys.categories);
+  // Packs show their items' prices and stock.
+  invalidate(qc, ["admin", "products"], adminKeys.stats, adminKeys.categories, adminKeys.packs);
 }
 
 export function useCreateProduct() {
@@ -186,11 +192,75 @@ export function useUploadProductImage() {
   });
 }
 
+// --- packs --------------------------------------------------------------------------------
+
+export function usePacks() {
+  return useQuery({ queryKey: adminKeys.packs, queryFn: () => api<PackAdmin[]>("/admin/packs") });
+}
+
+export function usePack(id: number | null) {
+  return useQuery({
+    queryKey: adminKeys.pack(id ?? 0),
+    queryFn: () => api<PackAdmin>(`/admin/packs/${id}`),
+    enabled: id !== null,
+  });
+}
+
+function onPackChanged(qc: ReturnType<typeof useQueryClient>, pack?: PackAdmin) {
+  if (pack) qc.setQueryData(adminKeys.pack(pack.id), pack);
+  invalidate(qc, adminKeys.packs);
+}
+
+export function useCreatePack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: PackIn) => api<PackAdmin>("/admin/packs", { method: "POST", json: body }),
+    onSuccess: (p) => onPackChanged(qc, p),
+  });
+}
+
+export function useUpdatePack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: PackPatch & { id: number }) =>
+      api<PackAdmin>(`/admin/packs/${id}`, { method: "PATCH", json: body }),
+    onSuccess: (p) => onPackChanged(qc, p),
+  });
+}
+
+export function useDeletePack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api<void>(`/admin/packs/${id}`, { method: "DELETE" }),
+    onSuccess: () => onPackChanged(qc),
+  });
+}
+
+export function useUploadPackImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => {
+      const body = new FormData();
+      body.append("file", file);
+      return api<PackAdmin>(`/admin/packs/${id}/image`, { method: "POST", body });
+    },
+    onSuccess: (p) => onPackChanged(qc, p),
+  });
+}
+
+export function useDeletePackImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api<PackAdmin>(`/admin/packs/${id}/image`, { method: "DELETE" }),
+    onSuccess: (p) => onPackChanged(qc, p),
+  });
+}
+
 // --- sizes (variants) ---------------------------------------------------------------------
 
 function onSizeChanged(qc: ReturnType<typeof useQueryClient>, product: ProductAdmin) {
   qc.setQueryData(adminKeys.product(product.id), product);
-  invalidate(qc, ["admin", "products"], adminKeys.stats);
+  invalidate(qc, ["admin", "products"], adminKeys.stats, adminKeys.packs);
 }
 
 export function useAddSize(productId: number) {

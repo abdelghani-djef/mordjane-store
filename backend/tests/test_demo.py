@@ -3,7 +3,7 @@ from sqlalchemy import func, select
 from app.cli import _seed
 from app.db import SessionLocal
 from app.demo import load_demo
-from app.models import AdminUser, Order, ProductVariant
+from app.models import AdminUser, Order, Pack, ProductVariant
 from app.security import verify_password
 from app.services.notifications import get_notification_settings
 
@@ -11,7 +11,7 @@ from app.services.notifications import get_notification_settings
 async def test_demo_loads_admin_settings_and_stock_once_without_orders():
     await _seed(force=False)
     async with SessionLocal() as session:
-        assert await load_demo(session) == {"admins": 1, "stock": 5}
+        assert await load_demo(session) == {"admins": 1, "stock": 5, "packs": 4}
 
     async with SessionLocal() as session:
         assert await session.scalar(select(func.count()).select_from(Order)) == 0
@@ -25,6 +25,12 @@ async def test_demo_loads_admin_settings_and_stock_once_without_orders():
             )
         )
         assert white_glaze is not None
+        packs = (await session.scalars(select(Pack).order_by(Pack.sort_order))).all()
+        assert [p.slug for p in packs if p.is_featured] == [
+            "duo-petit-dejeuner",
+            "trio-croquant",
+            "kit-patisserie",
+        ]
 
     # Running it again changes nothing.
     async with SessionLocal() as session:

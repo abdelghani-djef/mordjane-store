@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 from app.models import OrderStatus
 
@@ -14,8 +14,17 @@ def normalize_phone(value: str) -> str:
 
 
 class OrderLineIn(BaseModel):
-    variant_id: int
+    """One size (`variant_id`) or one pack (`pack_id`), never both."""
+
+    variant_id: int | None = None
+    pack_id: int | None = None
     quantity: int = Field(gt=0, le=99)
+
+    @model_validator(mode="after")
+    def _one_kind(self) -> OrderLineIn:
+        if (self.variant_id is None) == (self.pack_id is None):
+            raise ValueError("give either variant_id or pack_id")
+        return self
 
 
 class OrderIn(BaseModel):
@@ -38,10 +47,13 @@ class OrderIn(BaseModel):
 
     @field_validator("items")
     @classmethod
-    def _unique_sizes(cls, items: list[OrderLineIn]) -> list[OrderLineIn]:
-        ids = [i.variant_id for i in items]
-        if len(ids) != len(set(ids)):
+    def _unique_lines(cls, items: list[OrderLineIn]) -> list[OrderLineIn]:
+        sizes = [i.variant_id for i in items if i.variant_id is not None]
+        packs = [i.pack_id for i in items if i.pack_id is not None]
+        if len(sizes) != len(set(sizes)):
             raise ValueError("each product size may appear only once")
+        if len(packs) != len(set(packs)):
+            raise ValueError("each pack may appear only once")
         return items
 
 
@@ -119,11 +131,27 @@ class OrderCreatedOut(BaseModel):
     total: Decimal
 
 
+class OrderItemPartOut(BaseModel):
+    """One size inside an ordered pack; `quantity` is per box."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    variant_id: int | None
+    product_name: str
+    product_name_fr: str
+    product_name_ar: str | None
+    weight_grams: int | None
+    quantity: int
+
+
 class OrderItemOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     product_id: int | None
     variant_id: int | None
+    # Pack lines: the names are the pack's and `parts` lists what was in the box.
+    pack_id: int | None
+    parts: list[OrderItemPartOut] = []
     product_name: str
     product_name_fr: str
     product_name_ar: str | None
@@ -196,7 +224,10 @@ class StatusChangeIn(BaseModel):
 
 
 class StockProblem(BaseModel):
-    variant_id: int
+    """Why one line of the cart can't be bought: names the size or the pack it is about."""
+
+    variant_id: int | None = None
+    pack_id: int | None = None
     reason: str  # "not_found" | "unavailable" | "insufficient_stock"
     available: int = 0
 
