@@ -68,23 +68,22 @@ docker compose exec mordjane-api python -m app.cli create-admin
 docker compose exec mordjane-api python -m app.cli seed-demo
 ```
 
-The demo adds:
+The demo adds no orders. It adds:
 
-- **42 orders** from the last ~2 months, across 18 governorates and all five statuses: 6 pending, 4 validated, 5 shipped, 22 delivered and 5 cancelled. Each has a full status timeline with staff notes, and customers shopped in French, Arabic or English. Order times are relative to when you load them, so the dashboard always looks current.
 - **A demo admin:** `demo@mordjane.local` / `demo-mordjane`.
 - **Notification settings** with two staff recipients at `@mordjane.local`.
 - **Stock tweaks** so the low-stock list has entries: one size out of stock, three nearly out, and one switched off.
 
-Customer emails are `@example.com` addresses, and loading the demo sends no email. It asks for confirmation (`--yes` skips it) and does nothing if the demo orders are already there.
+It asks for confirmation (`--yes` skips it) and does nothing if the demo admin already exists.
 
-> **Never run `seed-demo` on the live shop.** The demo admin's password is public in this repository. To start over from a clean database: `docker compose down -v && docker compose up -d`.
+> **Never run `seed-demo` on the live shop.** The demo admin's password is public in this repository. To start over with an empty database, remove only the database volume (`down -v` would also delete the photos and the mail server's DKIM key): `docker compose stop mordjane-api mordjane-backup && docker compose rm -sf mordjane-db && docker volume rm mordjane_mordjane-db-data && docker compose up -d`.
 
 ### All commands
 
 | Command                                        | Does                                                                                        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `python -m app.cli seed`                       | delivery cities, delegations and the CEBON catalogue with photos (`--force` adds missing items to a database that already has data) |
-| `python -m app.cli seed-demo`                  | `seed` plus the demo orders, admin, settings and stock tweaks                                |
+| `python -m app.cli seed-demo`                  | `seed` plus the demo admin, settings and stock tweaks (no orders)                            |
 | `python -m app.cli seed-cities`                | only the governorates and delegations (adds missing ones, keeps your edits)                  |
 | `python -m app.cli sync-catalog`               | apply the CEBON range to an existing shop (see [Catalogue](#catalogue))                      |
 | `python -m app.cli create-admin`               | create an admin, or reset their password                                                     |
@@ -96,12 +95,11 @@ The demo files are plain JSON, so you can edit them:
 
 | File                                         | Contents                                                                 |
 | -------------------------------------------- | ------------------------------------------------------------------------ |
-| `backend/demo_data/orders.json`              | orders: customer, governorate and delegation, sizes and quantities, status history |
 | `backend/demo_data/admins.json`              | the demo admin                                                           |
 | `backend/demo_data/notification_settings.json` | staff recipients and email switches                                    |
 | `backend/demo_data/stock.json`               | stock and availability overrides per size                                |
 
-Products and sizes are referenced by slug and weight, and places by their French names. Prices and fees are read from the catalogue when the demo loads.
+Product sizes are referenced by product slug and weight.
 
 ## Emails
 
@@ -208,9 +206,9 @@ Backend settings (`backend/app/config.py`) come from environment variables. Set 
 
 ```sh
 # backend: 85 tests against a throwaway Postgres (needs uv and Python 3.14)
-docker run -d --rm --name mordjane-testdb -p 127.0.0.1:5435:5432 \
+docker run -d --rm --name mordjane-testdb -p 127.0.0.1:5445:5432 \
   -e POSTGRES_USER=mordjane -e POSTGRES_PASSWORD=mordjane -e POSTGRES_DB=mordjane_test postgres:17
-(cd backend && TEST_DATABASE_URL=postgresql+asyncpg://mordjane:mordjane@127.0.0.1:5435/mordjane_test \
+(cd backend && TEST_DATABASE_URL=postgresql+asyncpg://mordjane:mordjane@127.0.0.1:5445/mordjane_test \
   uv run pytest && uv run ruff check . && uv run ruff format --check .)
 docker stop mordjane-testdb
 # covers: server-side pricing, oversell 409, concurrent last-unit race,

@@ -343,23 +343,20 @@ async def _seed_demo() -> None:
         except DemoDataError as exc:
             raise typer.BadParameter(str(exc)) from exc
     if loaded is None:
-        typer.echo("Demo orders are already loaded.")
+        typer.echo("Demo data is already loaded.")
         return
-    typer.echo(
-        f"Loaded {loaded['orders']} demo orders, {loaded['admins']} demo admin and "
-        f"{loaded['stock']} stock adjustments."
-    )
+    typer.echo(f"Loaded {loaded['admins']} demo admin and {loaded['stock']} stock adjustments.")
 
 
 @cli.command("seed-demo")
 def seed_demo(yes: bool = typer.Option(False, "--yes", help="Skip the confirmation")):
-    """Load the seed data plus the demo orders, demo admin and settings from demo_data/.
+    """Load the seed data plus the demo admin, settings and stock tweaks from demo_data/.
 
     For demos and testing only: the demo admin's password is public in the repository.
     """
     if not yes:
         typer.confirm(
-            "This adds demo orders and a demo admin whose password is public. "
+            "This adds a demo admin whose password is public. "
             "Never run it on a live shop. Continue?",
             abort=True,
         )
