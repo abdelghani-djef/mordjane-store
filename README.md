@@ -104,12 +104,12 @@ Product sizes are referenced by product slug and weight.
 
 A pack is a box of several sizes sold together for less than buying them one by one, e.g. 2 × peanut cream 200 g + hazelnut cream 200 g.
 
-`seed` loads the shop's 12 promotional offers (« Offre 1 » to « Offre 12 », from 50 to 104 DT), with offers 1, 8 and 12 on the home page. They live in `backend/app/seed_packs.py`. Their "instead of" prices come from the jars' prices in `backend/app/seed_catalog.py`: 350 g hazelnut cream 25 DT, 350 g cocoa hazelnut 23 DT, 200 g rocher 22 DT (hazelnut) and 20 DT (cocoa), 600 g rocher 42 DT (hazelnut) and 33 DT (cocoa).
+`seed` loads the shop's 12 promotional offers (« Offre 1 » to « Offre 12 », from 50 to 104 DT), with offers 1, 8 and 12 on the home page. They live in `backend/app/seed_packs.py`, each with its offer price and its "au lieu de" price from the offers sheet.
 
-- **Admin → Packs** creates them. Choose the sizes and how many of each go in the box (at least 2 items in total), then type the pack price. The form shows what the items cost bought separately and how much customers save. A pack must cost less than its items bought separately. A photo of the box is optional: without one, the shop draws the box open with its items' photos.
-- **In the shop:** packs have their own page (`/packs`) and link in the header. Each pack shows its price, the separate price struck through, and the saving. Packs switched to *On home page* appear right under the hero.
+- **Admin → Packs** creates them. Choose the sizes and how many of each go in the box (at least 2 items in total), then type the offer price and the "au lieu de" price shown struck through, which must be higher. The form shows how much customers save, and what the items cost one by one at today's prices for reference. A photo of the box is optional: without one, the shop draws the box open with its items' photos.
+- **In the shop:** packs have their own page (`/packs`) and link in the header. Each pack shows its price, the "au lieu de" price struck through, and the saving. Packs switched to *On home page* appear right under the hero.
 - **Stock:** a pack has no stock of its own. Each box takes its items from the sizes' stock, so it sells out as soon as one item runs short, and cancelling an order puts the items back. Switching off a size or its product makes the pack unavailable. A size can't be deleted while a pack contains it.
-- **Prices:** the pack price is fixed and doesn't follow later price changes. If its items get cheaper than the pack, the admin list flags it ("No longer cheaper") and the shop stops showing a struck price.
+- **Prices:** both prices are the pack's own. Changing a jar's price never changes a pack's prices.
 - **Orders** keep a copy of what was in each box. Editing or deleting the pack later never changes past orders, and the order page and emails list the box contents for staff and customers.
 
 ## Emails
@@ -200,7 +200,7 @@ Backend settings (`backend/app/config.py`) come from environment variables. Set 
 ## Tests & checks
 
 ```sh
-# backend: 110 tests against a throwaway Postgres (needs uv and Python 3.14)
+# backend: 111 tests against a throwaway Postgres (needs uv and Python 3.14)
 docker run -d --rm --name mordjane-testdb -p 127.0.0.1:5445:5432 \
   -e POSTGRES_USER=mordjane -e POSTGRES_PASSWORD=mordjane -e POSTGRES_DB=mordjane_test postgres:17
 (cd backend && TEST_DATABASE_URL=postgresql+asyncpg://mordjane:mordjane@127.0.0.1:5445/mordjane_test \

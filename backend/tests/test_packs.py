@@ -17,13 +17,14 @@ async def _stock(session, variant_id: int) -> int:
 
 
 def _pack(catalog, **overrides) -> dict:
-    """Breakfast duo: 2 × dark (9.500) + 1 × almonds (14.500) = 33.500, sold for 29.900."""
+    """Breakfast duo: 2 × dark + 1 × almonds, sold for 29.900 instead of 33.500."""
     body = {
         "slug": "breakfast-duo",
         "name_en": "Breakfast duo",
         "name_fr": "Duo petit-déjeuner",
         "name_ar": "ثنائي الفطور",
         "price": "29.900",
+        "regular_price": "33.500",
         "is_featured": True,
         "items": [
             {"variant_id": catalog["dark"].id, "quantity": 2},
@@ -79,7 +80,8 @@ async def test_admin_creates_pack_and_shop_shows_both_prices(client, admin_clien
         {"items": [{"variant_id": "dark", "quantity": 1}]},  # a single item is no pack
         {"items": [{"variant_id": "dark", "quantity": 1}, {"variant_id": "dark", "quantity": 1}]},
         {"items": [{"variant_id": 9999, "quantity": 2}]},
-        {"price": "33.500"},  # must cost less than the items bought separately
+        {"price": "33.500"},  # must cost less than its "instead of" price
+        {"regular_price": "20.000"},
         {"slug": "Not A Slug"},
     ],
 )
@@ -97,16 +99,19 @@ async def test_duplicate_slug_conflicts(admin_client, catalog):
     assert r.status_code == 409
 
 
-async def test_editing_contents_rechecks_the_saving(admin_client, catalog):
+async def test_editing_keeps_the_pack_cheaper_than_its_instead_of_price(admin_client, catalog):
     pack = await _create(admin_client, catalog)
     url = f"/api/admin/packs/{pack['id']}"
     assert (await admin_client.patch(url, json={"price": "40.000"})).status_code == 422
-    # 3 × dark = 28.500 is less than the current 29.900 price.
-    r = await admin_client.patch(
-        url, json={"items": [{"variant_id": catalog["dark"].id, "quantity": 3}]}
+    assert (await admin_client.patch(url, json={"regular_price": "29.000"})).status_code == 422
+    r = await admin_client.patch(url, json={"price": "40.000", "regular_price": "45.000"})
+    assert r.status_code == 200
+    assert (Decimal(r.json()["price"]), Decimal(r.json()["regular_price"])) == (
+        Decimal("40.000"),
+        Decimal("45.000"),
     )
-    assert r.status_code == 422
 
+    # The contents can change freely: the "instead of" price is the admin's, not the items'.
     r = await admin_client.patch(
         url,
         json={
@@ -120,7 +125,7 @@ async def test_editing_contents_rechecks_the_saving(admin_client, catalog):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["name_en"] == "Big duo"
-    assert Decimal(body["regular_price"]) == Decimal("88.000")
+    assert Decimal(body["regular_price"]) == Decimal("45.000")
     assert [i["variant"]["id"] for i in body["items"]] == [
         catalog["dark"].id,
         catalog["dark_bulk"].id,
@@ -308,6 +313,7 @@ async def test_sizes_in_a_pack_cannot_be_deleted(admin_client, catalog):
             slug="bulk-duo",
             name_en="Bulk duo",
             price="70.000",
+            regular_price="80.000",
             items=[
                 {"variant_id": catalog["dark_bulk"].id, "quantity": 1},
                 {"variant_id": catalog["milk"].id, "quantity": 1},

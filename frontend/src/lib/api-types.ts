@@ -1284,7 +1284,7 @@ export interface components {
             /** Sort Order */
             sort_order: number;
             /** Problem */
-            problem: ("item_unavailable" | "out_of_stock" | "no_saving") | null;
+            problem: ("item_unavailable" | "out_of_stock") | null;
             /**
              * Created At
              * Format: date-time
@@ -1340,6 +1340,8 @@ export interface components {
             name_fr: string;
             /** Price */
             price: number | string;
+            /** Regular Price */
+            regular_price: number | string;
             /** Items */
             items: components["schemas"]["PackItemIn"][];
         };
@@ -1408,6 +1410,8 @@ export interface components {
             description_ar?: string | null;
             /** Price */
             price?: number | string | null;
+            /** Regular Price */
+            regular_price?: number | string | null;
             /** Items */
             items?: components["schemas"]["PackItemIn"][] | null;
             /** Is Available */

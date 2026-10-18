@@ -70,33 +70,40 @@ function makeSchema(t: ReturnType<typeof useTranslations<"Admin.packs">>) {
       .regex(/^[1-9]\d?$/, t("errors.quantity"))
       .refine((q) => Number(q) <= 50, t("errors.quantity")),
   });
-  return z.object({
-    slug: z
-      .string()
-      .trim()
-      .min(1, required)
-      .max(160)
-      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, t("errors.slug")),
-    name_en: z.string().trim().min(1, required).max(160),
-    name_fr: z.string().trim().min(1, required).max(160),
-    name_ar: z.string().trim().max(160),
-    description_en: z.string(),
-    description_fr: z.string(),
-    description_ar: z.string(),
-    price: z.string().trim().regex(PRICE_PATTERN, t("errors.price")),
-    is_available: z.boolean(),
-    is_featured: z.boolean(),
-    items: z
-      .array(item)
-      .refine(
-        (items) => new Set(items.map((i) => i.variant_id)).size === items.length,
-        t("errors.duplicate"),
-      )
-      .refine(
-        (items) => items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0) >= 2,
-        t("errors.minItems"),
-      ),
-  });
+  const money = z.string().trim().regex(PRICE_PATTERN, t("errors.price"));
+  return z
+    .object({
+      slug: z
+        .string()
+        .trim()
+        .min(1, required)
+        .max(160)
+        .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, t("errors.slug")),
+      name_en: z.string().trim().min(1, required).max(160),
+      name_fr: z.string().trim().min(1, required).max(160),
+      name_ar: z.string().trim().max(160),
+      description_en: z.string(),
+      description_fr: z.string(),
+      description_ar: z.string(),
+      price: money,
+      regular_price: money,
+      is_available: z.boolean(),
+      is_featured: z.boolean(),
+      items: z
+        .array(item)
+        .refine(
+          (items) => new Set(items.map((i) => i.variant_id)).size === items.length,
+          t("errors.duplicate"),
+        )
+        .refine(
+          (items) => items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0) >= 2,
+          t("errors.minItems"),
+        ),
+    })
+    .refine((v) => Number(v.price) < Number(v.regular_price), {
+      message: t("errors.noSaving"),
+      path: ["price"],
+    });
 }
 
 type FormValues = z.infer<ReturnType<typeof makeSchema>>;
@@ -113,6 +120,7 @@ function toFormValues(p?: PackAdmin): FormValues {
     description_fr: p?.description_fr ?? "",
     description_ar: p?.description_ar ?? "",
     price: p ? Number(p.price).toFixed(3) : "",
+    regular_price: p ? Number(p.regular_price).toFixed(3) : "",
     is_available: p?.is_available ?? true,
     is_featured: p?.is_featured ?? false,
     items: p
@@ -165,19 +173,22 @@ export function PackForm({ pack }: { pack?: PackAdmin }) {
     defaultValues: toFormValues(pack),
   });
   const items = useFieldArray({ control: form.control, name: "items" });
-  const [watchedItems, watchedPrice] = useWatch({
+  const [watchedItems, watchedPrice, watchedRegular] = useWatch({
     control: form.control,
-    name: ["items", "price"],
+    name: ["items", "price", "regular_price"],
   });
 
   const options = sizeOptions(products.data?.items);
   const chosen = watchedItems
     .map((i) => ({ option: options.get(Number(i.variant_id)), quantity: Number(i.quantity) || 0 }))
     .filter((c): c is { option: SizeOption; quantity: number } => !!c.option && c.quantity > 0);
-  const regular = chosen.reduce((sum, c) => sum + c.option.price * c.quantity, 0);
-  const price = PRICE_PATTERN.test(watchedPrice?.trim() ?? "") ? Number(watchedPrice) : null;
-  const saved = price !== null ? regular - price : 0;
-  const tooExpensive = price !== null && chosen.length > 0 && saved <= 0;
+  // For reference: what the items cost one by one at today's prices.
+  const separately = chosen.reduce((sum, c) => sum + c.option.price * c.quantity, 0);
+  const asNumber = (v: string | undefined) =>
+    PRICE_PATTERN.test(v?.trim() ?? "") ? Number(v) : null;
+  const price = asNumber(watchedPrice);
+  const regular = asNumber(watchedRegular);
+  const saved = price !== null && regular !== null ? regular - price : 0;
   const preview: PackContent[] = chosen.map(({ option, quantity }) => ({
     productId: option.product.id,
     slug: option.product.slug,
@@ -190,12 +201,6 @@ export function PackForm({ pack }: { pack?: PackAdmin }) {
   }));
 
   async function onSubmit(values: FormValues) {
-    if (tooExpensive) {
-      form.setError("price", {
-        message: t("errors.noSaving", { amount: formatPrice(regular, locale) }),
-      });
-      return;
-    }
     const body = {
       ...values,
       name_ar: values.name_ar || null,
@@ -376,7 +381,9 @@ export function PackForm({ pack }: { pack?: PackAdmin }) {
                 </Button>
               </div>
             ))}
-            {itemsError?.message && <p className="text-sm text-destructive">{itemsError.message}</p>}
+            {itemsError?.message && (
+              <p className="text-sm text-destructive">{itemsError.message}</p>
+            )}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <Button type="button" variant="outline" onClick={() => items.append(EMPTY_ITEM)}>
                 <PlusIcon /> {t("addItem")}
@@ -394,43 +401,60 @@ export function PackForm({ pack }: { pack?: PackAdmin }) {
           </CardHeader>
           <CardContent>
             <FieldGroup>
-              <div className="flex items-baseline justify-between gap-3 rounded-lg bg-muted px-4 py-3">
-                <span className="text-muted-foreground">{t("separately")}</span>
-                <span className="price text-lg">{formatPrice(regular, locale)}</span>
-              </div>
-              <Controller
-                name="price"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid || tooExpensive}>
-                    <FieldLabel htmlFor="price">{t("packPrice")}</FieldLabel>
-                    <Input
-                      id="price"
-                      inputMode="decimal"
-                      placeholder="19.900"
-                      className="sm:w-48"
-                      aria-invalid={fieldState.invalid || tooExpensive}
-                      {...field}
-                    />
-                    {fieldState.invalid ? (
-                      <FieldError errors={[fieldState.error]} />
-                    ) : tooExpensive ? (
-                      <FieldError>
-                        {t("errors.noSaving", { amount: formatPrice(regular, locale) })}
-                      </FieldError>
-                    ) : (
-                      saved > 0 && (
-                        <FieldDescription className="font-medium text-honey-ink">
-                          {t("savingLine", {
-                            amount: formatPrice(saved, locale),
-                            percent: Math.round((saved / regular) * 100),
-                          })}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Controller
+                  name="price"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="price">{t("packPrice")}</FieldLabel>
+                      <Input
+                        id="price"
+                        inputMode="decimal"
+                        placeholder="75.000"
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                      {fieldState.invalid ? (
+                        <FieldError errors={[fieldState.error]} />
+                      ) : (
+                        regular !== null &&
+                        saved > 0 && (
+                          <FieldDescription className="font-medium text-honey-ink">
+                            {t("savingLine", {
+                              amount: formatPrice(saved, locale),
+                              percent: Math.round((saved / regular) * 100),
+                            })}
+                          </FieldDescription>
+                        )
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="regular_price"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="regular_price">{t("regularPrice")}</FieldLabel>
+                      <Input
+                        id="regular_price"
+                        inputMode="decimal"
+                        placeholder="90.000"
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                      {fieldState.invalid ? (
+                        <FieldError errors={[fieldState.error]} />
+                      ) : (
+                        <FieldDescription>
+                          {t("regularHint", { amount: formatPrice(separately, locale) })}
                         </FieldDescription>
-                      )
-                    )}
-                  </Field>
-                )}
-              />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
             </FieldGroup>
           </CardContent>
         </Card>

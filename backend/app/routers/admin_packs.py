@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
@@ -10,7 +9,7 @@ from app.db import get_session
 from app.media import delete_image, save_image
 from app.models import Pack, PackItem, ProductVariant
 from app.routers.public_packs import PACK_CONTENTS
-from app.schemas.packs import PackAdminOut, PackIn, PackItemIn, PackPatch
+from app.schemas.packs import NO_SAVING, PackAdminOut, PackIn, PackItemIn, PackPatch
 from app.security import require_admin
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -48,23 +47,16 @@ async def _pack_out(session: AsyncSession, pack_id: int) -> Pack:
     return pack
 
 
-async def _priced_items(
-    session: AsyncSession, items: list[PackItemIn], price: Decimal
-) -> list[PackItem]:
-    """The pack's rows, after checking every size exists and the pack saves money."""
-    rows = await session.scalars(
-        select(ProductVariant).where(ProductVariant.id.in_([i.variant_id for i in items]))
+async def _pack_items(session: AsyncSession, items: list[PackItemIn]) -> list[PackItem]:
+    """The pack's rows, after checking every size exists."""
+    known = set(
+        await session.scalars(
+            select(ProductVariant.id).where(ProductVariant.id.in_([i.variant_id for i in items]))
+        )
     )
-    prices = {v.id: v.price for v in rows}
-    missing = [i.variant_id for i in items if i.variant_id not in prices]
+    missing = [i.variant_id for i in items if i.variant_id not in known]
     if missing:
         raise HTTPException(422, f"Unknown size: {missing[0]}")
-    regular = sum((prices[i.variant_id] * i.quantity for i in items), Decimal("0.000"))
-    if price >= regular:
-        raise HTTPException(
-            422,
-            f"A pack must cost less than its items bought separately ({regular:.3f})",
-        )
     return [PackItem(variant_id=i.variant_id, quantity=i.quantity) for i in items]
 
 
@@ -83,7 +75,7 @@ async def get_pack(pack_id: int, session: Session):
 
 @router.post("/packs", response_model=PackAdminOut, status_code=201)
 async def create_pack(data: PackIn, session: Session):
-    items = await _priced_items(session, data.items, data.price)
+    items = await _pack_items(session, data.items)
     pack = Pack(**data.model_dump(exclude={"items"}), items=items)
     session.add(pack)
     await _commit_or_conflict(session)
@@ -94,18 +86,16 @@ async def create_pack(data: PackIn, session: Session):
 async def update_pack(pack_id: int, data: PackPatch, session: Session):
     pack = await _get_pack(session, pack_id)
     changes = data.model_dump(exclude_unset=True)
-    for field in ("slug", "name_en", "name_fr", "price", "items"):
+    for field in ("slug", "name_en", "name_fr", "price", "regular_price", "items"):
         if field in changes and changes[field] is None:
             raise HTTPException(422, f"{field} cannot be null")
-    if "items" in changes or "price" in changes:
-        items = data.items or [
-            PackItemIn(variant_id=i.variant_id, quantity=i.quantity) for i in pack.items
-        ]
-        new_items = await _priced_items(session, items, changes.get("price", pack.price))
-        if "items" in changes:
-            pack.items.clear()
-            await session.flush()  # free the (pack, size) pairs before re-adding them
-            pack.items.extend(new_items)
+    if changes.get("price", pack.price) >= changes.get("regular_price", pack.regular_price):
+        raise HTTPException(422, NO_SAVING)
+    if data.items is not None:
+        new_items = await _pack_items(session, data.items)
+        pack.items.clear()
+        await session.flush()  # free the (pack, size) pairs before re-adding them
+        pack.items.extend(new_items)
     for field, value in changes.items():
         if field != "items":
             setattr(pack, field, value)

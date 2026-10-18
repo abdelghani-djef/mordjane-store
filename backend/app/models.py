@@ -162,7 +162,10 @@ class Pack(TimestampMixin, Base):
     """
 
     __tablename__ = "packs"
-    __table_args__ = (CheckConstraint("price >= 0", name="price_non_negative"),)
+    __table_args__ = (
+        CheckConstraint("price >= 0", name="price_non_negative"),
+        CheckConstraint("price < regular_price", name="price_below_regular"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     slug: Mapped[str] = mapped_column(String(160), unique=True)
@@ -173,6 +176,8 @@ class Pack(TimestampMixin, Base):
     description_fr: Mapped[str] = mapped_column(Text, default="")
     description_ar: Mapped[str] = mapped_column(Text, default="")
     price: Mapped[Decimal] = mapped_column(Money)
+    # The "instead of" price shown struck through next to `price`, set with the offer.
+    regular_price: Mapped[Decimal] = mapped_column(Money)
     # Photo of the box; without one the shop draws the box from its items' photos.
     image_path: Mapped[str | None] = mapped_column(String(255))
     is_available: Mapped[bool] = mapped_column(default=True)
@@ -184,11 +189,6 @@ class Pack(TimestampMixin, Base):
     )
 
     # These read items → variant → product: load them (selectinload) before serialising.
-    @property
-    def regular_price(self) -> Decimal:
-        """What the items cost bought separately (the struck-through price)."""
-        return sum((i.variant.price * i.quantity for i in self.items), Decimal("0.000"))
-
     @property
     def boxes_left(self) -> int:
         """How many boxes the sizes' stock can still fill."""
@@ -202,13 +202,11 @@ class Pack(TimestampMixin, Base):
 
     @property
     def problem(self) -> str | None:
-        """For the admin list: why customers can't buy it, or why it no longer saves money."""
+        """For the admin list: why customers can't buy it right now, if anything."""
         if not all(i.variant.sellable for i in self.items):
             return "item_unavailable"
         if self.boxes_left == 0:
             return "out_of_stock"
-        if self.price >= self.regular_price:
-            return "no_saving"
         return None
 
 

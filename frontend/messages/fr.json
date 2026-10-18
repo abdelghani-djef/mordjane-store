@@ -436,8 +436,9 @@
       "chooseItem": "Choisir un format",
       "units": "{count, plural, one {# article} other {# articles}} dans la boîte",
       "pricing": "Prix",
-      "separately": "Articles achetés séparément",
-      "packPrice": "Prix du pack (DT)",
+      "packPrice": "Prix de l'offre (DT)",
+      "regularPrice": "Au lieu de (DT)",
+      "regularHint": "Affiché barré. Les articles coûtent {amount} à l'unité aux prix actuels.",
       "savingLine": "Les clients économisent {amount} ({percent} %)",
       "image": "Photo de la boîte",
       "imageHint": "Facultatif. Sans photo, la boutique dessine la boîte avec les photos de ses articles.",
@@ -453,8 +454,7 @@
       "boxesLeft": "{count, plural, =0 {Plus aucune boîte} one {# boîte restante} other {# boîtes restantes}}",
       "problem": {
         "item_unavailable": "Un article est désactivé",
-        "out_of_stock": "En rupture",
-        "no_saving": "N'est plus moins cher"
+        "out_of_stock": "En rupture"
       },
       "errors": {
         "required": "Obligatoire",
@@ -464,7 +464,7 @@
         "duplicate": "Chaque format une seule fois : augmentez plutôt sa quantité",
         "chooseItem": "Choisissez un format",
         "quantity": "De 1 à 50",
-        "noSaving": "Le pack doit coûter moins de {amount}"
+        "noSaving": "Doit être inférieur au prix « au lieu de »"
       }
     },
     "categories": {

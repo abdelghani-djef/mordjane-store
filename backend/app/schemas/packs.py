@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 from app.schemas.catalog import (
     MONEY,
@@ -13,6 +13,7 @@ from app.schemas.catalog import (
 )
 
 MAX_PACK_LINES = 12
+NO_SAVING = "The pack price must be lower than its 'instead of' price"
 
 
 class PackProductOut(BaseModel):
@@ -53,7 +54,7 @@ class PackOut(BaseModel):
     description_fr: str
     description_ar: str
     price: Decimal
-    # The items bought one by one (shown struck through next to `price`).
+    # The "instead of" price, shown struck through next to `price`.
     regular_price: Decimal
     in_stock: bool
     boxes_left: int
@@ -75,8 +76,8 @@ class PackAdminOut(PackOut):
     items: list[PackAdminItemOut]
     is_available: bool
     sort_order: int
-    # Why customers can't buy it right now (or it no longer saves them money), if anything.
-    problem: Literal["item_unavailable", "out_of_stock", "no_saving"] | None
+    # Why customers can't buy it right now, if anything.
+    problem: Literal["item_unavailable", "out_of_stock"] | None
     created_at: datetime
     updated_at: datetime
 
@@ -110,12 +111,19 @@ class PackIn(_PackFields):
     name_en: str = Field(min_length=1, max_length=160)
     name_fr: str = Field(min_length=1, max_length=160)
     price: Decimal = Field(ge=0, **MONEY)
+    regular_price: Decimal = Field(gt=0, **MONEY)
     items: list[PackItemIn] = Field(min_length=1, max_length=MAX_PACK_LINES)
 
     @field_validator("items")
     @classmethod
     def _valid_items(cls, items: list[PackItemIn]) -> list[PackItemIn]:
         return _check_items(items)
+
+    @model_validator(mode="after")
+    def _saves_money(self) -> PackIn:
+        if self.price >= self.regular_price:
+            raise ValueError(NO_SAVING)
+        return self
 
 
 class PackPatch(BaseModel):
@@ -127,6 +135,7 @@ class PackPatch(BaseModel):
     description_fr: str | None = None
     description_ar: str | None = None
     price: Decimal | None = Field(None, ge=0, **MONEY)
+    regular_price: Decimal | None = Field(None, gt=0, **MONEY)
     # Replaces the whole contents when given.
     items: list[PackItemIn] | None = Field(None, min_length=1, max_length=MAX_PACK_LINES)
     is_available: bool | None = None

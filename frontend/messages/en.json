@@ -436,8 +436,9 @@
       "chooseItem": "Choose a size",
       "units": "{count, plural, one {# item} other {# items}} in the box",
       "pricing": "Price",
-      "separately": "Items bought separately",
-      "packPrice": "Pack price (DT)",
+      "packPrice": "Offer price (DT)",
+      "regularPrice": "Instead of (DT)",
+      "regularHint": "Shown struck through. The items cost {amount} one by one at today's prices.",
       "savingLine": "Customers save {amount} ({percent}%)",
       "image": "Box photo",
       "imageHint": "Optional. Without a photo, the shop draws the box with its items' photos.",
@@ -453,8 +454,7 @@
       "boxesLeft": "{count, plural, =0 {No box left} one {# box left} other {# boxes left}}",
       "problem": {
         "item_unavailable": "An item is switched off",
-        "out_of_stock": "Out of stock",
-        "no_saving": "No longer cheaper"
+        "out_of_stock": "Out of stock"
       },
       "errors": {
         "required": "Required",
@@ -464,7 +464,7 @@
         "duplicate": "Each size can appear only once: raise its quantity instead",
         "chooseItem": "Choose a size",
         "quantity": "1 to 50",
-        "noSaving": "The pack must cost less than {amount}"
+        "noSaving": "Must be lower than the “instead of” price"
       }
     },
     "categories": {

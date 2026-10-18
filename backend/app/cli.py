@@ -241,6 +241,7 @@ async def _seed_packs(session) -> int:
                 name_fr=item.name.fr,
                 name_ar=item.name.ar,
                 price=Decimal(item.price),
+                regular_price=Decimal(item.regular_price),
                 is_featured=item.featured,
                 sort_order=item.number,
                 items=[PackItem(variant_id=sizes[size], quantity=1) for size in item.items],
