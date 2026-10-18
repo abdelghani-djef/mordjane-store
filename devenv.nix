@@ -64,10 +64,6 @@ in
     ];
   };
 
-  # Local mail catcher: every email the shop sends lands in the inbox at http://localhost:8025
-  # (SMTP on 1025). Nothing is delivered to real addresses.
-  services.mailpit.enable = true;
-
   env = {
     UV_PYTHON_DOWNLOADS = "never";
     DATABASE_URL = dbUrl "mordjane";
@@ -76,10 +72,6 @@ in
     MEDIA_DIR = "${config.devenv.state}/media";
     BACKEND_URL = "http://127.0.0.1:8000";
     NEXT_TELEMETRY_DISABLED = "1";
-    # Email: Mailpit in development; point these at a real SMTP provider in production.
-    SMTP_HOST = "127.0.0.1";
-    SMTP_PORT = "1025";
-    MAIL_FROM = "Mordjane <orders@mordjane.local>";
     PUBLIC_SITE_URL = "http://localhost:3000";
   };
 

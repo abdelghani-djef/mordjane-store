@@ -29,7 +29,7 @@ The shop runs as four containers:
 | `mordjane-backup`| `postgres:17`         | none; daily database dump (see [Backups](#backups)) |
 
 ```sh
-cp .env.example .env            # set POSTGRES_PASSWORD, JWT_SECRET, PUBLIC_SITE_URL and the Resend settings
+cp .env.example .env            # set POSTGRES_PASSWORD, JWT_SECRET, PUBLIC_SITE_URL
 mkdir -m 700 ~/mordjane_db_backups   # where the daily backups go (only you can open it)
 docker compose up -d --build    # builds the images, migrates the database, starts the shop
 ```
@@ -120,24 +120,16 @@ The shop emails customers and staff. Customers give their email at checkout, and
 
 ### Sending email
 
-The shop sends through [Resend](https://resend.com) over SMTP. No mail server to run: Resend signs and delivers the messages. The free plan sends 3,000 emails a month, at most 100 a day.
+The shop sends through [Resend](https://resend.com)'s HTTP API, in development too. The API key goes in `.env` as `RESEND_API_KEY` (the repository root's `.env` for Docker, `backend/.env` for local development); it must never be committed, and GitHub refuses pushes that contain it. The rest is fixed in `backend/app/mail.py`:
 
-1. Create a Resend account.
-2. **Verify your domain** under *Domains*: add it (e.g. `mordjane.tn`) and publish the DNS records Resend shows (DKIM, plus SPF and MX on a `send` subdomain) at your registrar. Until then Resend only sends from `onboarding@resend.dev`, and only to your own account's address: enough for a first test, not for customers.
-3. Create an **API key** under *API Keys* with *Sending access*. It's shown once.
-4. Fill in `.env`:
+| Constant | Value |
+| --- | --- |
+| `RESEND_FROM` | `onboarding@resend.dev` |
+| `RESEND_TO` | `abdelghanismartdrilling@gmail.com` |
 
-| Variable | Example | Notes |
-| --- | --- | --- |
-| `MAIL_FROM` | `Mordjane <noreply@mordjane.tn>` | **required**; must be on the verified domain |
-| `SMTP_USERNAME` | `resend` | always the word `resend` |
-| `SMTP_PASSWORD` | `re_…` | the API key; `.env` is never committed, keep the key only there |
-| `PUBLIC_SITE_URL` | `https://mordjane.tn` | base for the tracking and admin links in emails |
-| `MAIL_ENABLED` | `true` | `false` logs emails instead of sending them |
-
-- **Check it:** send yourself a message from **Admin → Notifications → Send test email**. `docker compose logs mordjane-api | grep mordjane.mail` shows each send or why it failed (`535` means a wrong API key; a refused sender means `MAIL_FROM` isn't on a verified domain). Resend's *Emails* page shows what happened to each message after that.
-- **Port blocked?** Some hosts (DigitalOcean for new accounts, among others) block outgoing port 587. Set `SMTP_PORT=2587` in `.env`; Resend accepts the same STARTTLS connection there.
-- **Another provider** works too: set `SMTP_HOST`, `SMTP_PORT`, `SMTP_STARTTLS` / `SMTP_SSL` in `.env`; they override the Resend defaults (`smtp.resend.com`, port `587`, STARTTLS).
+- **Every email goes to `RESEND_TO`,** whoever it was meant for (customer or staff). Resend's shared `onboarding@resend.dev` sender can only deliver to the Resend account's own address. To email customers, verify a domain in Resend (*Domains*), set `RESEND_FROM` to an address on it, and send to the real recipients instead of `RESEND_TO`.
+- **Limit:** the free plan sends 3,000 emails a month, at most 100 a day, development included. Set `MAIL_ENABLED=false` to log emails instead of sending them.
+- **Check it:** **Admin → Notifications → Send test email**. `docker compose logs mordjane-api | grep mordjane.mail` shows each send or Resend's error; Resend's *Emails* page shows what happened after that.
 
 ## How it fits together
 
@@ -211,8 +203,7 @@ docker stop mordjane-testdb
 
 # end-to-end, against a running shop with `seed` and an admin
 (cd frontend && npx playwright install chromium && npm run e2e)
-# E2E_BASE_URL (http://127.0.0.1:3000), E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD, and
-# E2E_MAILPIT_URL: the email checks read a Mailpit inbox the shop's SMTP must point at
+# E2E_BASE_URL (http://127.0.0.1:3000), E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD
 ```
 
 ## Schema changes
@@ -249,7 +240,7 @@ The dumps are owned by root, but you can read, copy and delete them because the 
 
 - Set `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`, and serve everything over HTTPS (keep `COOKIE_SECURE=true`).
 - Load data with `seed` and `create-admin`, never `seed-demo`.
-- Verify your domain in Resend, set the API key in `.env`, and check that a test email reaches the inbox (see [Sending email](#sending-email)).
+- Verify a domain in Resend so customers get their own emails, and check that a test email arrives (see [Sending email](#sending-email)).
 - Add rate limiting on `POST /api/admin/auth/login` and `POST /api/orders`, at the reverse proxy or with middleware.
 - Copy `~/mordjane_db_backups` off the server regularly (see [Backups](#backups)), and back up the `mordjane-media` volume (product photos) too.
 - Review product prices and stock under **Admin → Products**. The supplier doesn't publish prices, so sizes added from the CEBON range have estimated prices and placeholder stock.

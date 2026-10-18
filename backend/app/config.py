@@ -16,20 +16,10 @@ class Settings(BaseSettings):
     # Initial value only; admins change it under Notifications (stored in the database).
     low_stock_threshold: int = 5
 
-    # Email (Mailpit in development, Resend in production). With SMTP_SSL the connection is TLS from the start
-    # (port 465); with SMTP_STARTTLS it upgrades after connecting (port 587).
+    # Email goes through Resend (see app/mail.py); false logs emails instead of sending them.
     mail_enabled: bool = True
-    smtp_host: str = "127.0.0.1"
-    smtp_port: int = 1025
-    smtp_username: str | None = None
-    smtp_password: str | None = None
-    smtp_starttls: bool = False
-    smtp_ssl: bool = False
-    smtp_timeout_seconds: float = 15
-    # Name announced in the SMTP greeting (EHLO). Default: the MAIL_FROM domain. Setting it
-    # avoids a reverse-DNS lookup of this machine on every send, which can stall for seconds.
-    smtp_helo_hostname: str | None = None
-    mail_from: str = "Mordjane <noreply@mordjane.local>"
+    # Secret: set RESEND_API_KEY in .env, never in the code.
+    resend_api_key: str = ""
     # Base URL of the storefront, for links in emails (tracking page, admin order page).
     public_site_url: str = "http://localhost:3000"
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]

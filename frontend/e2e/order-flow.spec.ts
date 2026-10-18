@@ -1,24 +1,10 @@
-import { type APIRequestContext, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? "admin@mordjane.local";
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "choco-admin-dev";
 const PHONE = "+216 98 765 432";
-const MAILPIT = process.env.E2E_MAILPIT_URL ?? "http://127.0.0.1:8025";
 
-type MailpitMessage = { ID: string; Subject: string; To: { Address: string }[] };
-
-/** Subjects Mailpit caught for an address (emails are sent right after the response). */
-async function inbox(request: APIRequestContext, address: string): Promise<string[]> {
-  const res = await request.get(`${MAILPIT}/api/v1/search`, {
-    params: { query: `to:${address}` },
-  });
-  expect(res.ok(), "Mailpit must be running (devenv up)").toBeTruthy();
-  const body = (await res.json()) as { messages: MailpitMessage[] };
-  return body.messages.map((m) => m.Subject);
-}
-
-test("customer orders, admin fulfils, customer tracks delivery", async ({ page, request }) => {
-  // A fresh address per run, so this run's emails are easy to find in Mailpit.
+test("customer orders, admin fulfils, customer tracks delivery", async ({ page }) => {
   const customerEmail = `yasmine+${Date.now()}@example.com`;
   // --- shop: pick sizes and add them to the cart --------------------------------------------
   await page.goto("/en/products?category=rocher");
@@ -86,8 +72,6 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page, 
   expect(code).toMatch(/^MJ-[A-Z2-9]{6}$/);
   await expect(page.getByRole("heading", { name: code })).toBeVisible();
 
-  // The confirmation email (with the code) reached the customer's inbox.
-  await expect.poll(() => inbox(request, customerEmail)).toContain(`Order ${code} received`);
 
   // --- admin validates, ships, delivers -----------------------------------------------------
   await page.goto("/en/admin/login");
@@ -114,15 +98,10 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page, 
   await expect(page.getByText("Livrée. Bonne dégustation !")).toBeVisible();
   await expect(page.getByText(/Hammam Sousse, Sousse/)).toBeVisible();
 
-  // …and was emailed when the order arrived (in English, the language they ordered in).
-  await expect.poll(() => inbox(request, customerEmail)).toContain(`Order ${code} delivered`);
   await expect(page.getByText(/Crème de noisettes rocher, 600 g/)).toBeVisible();
 });
 
-test("the Arabic shop reads right to left, through checkout and email", async ({
-  page,
-  request,
-}) => {
+test("the Arabic shop reads right to left, through checkout", async ({ page }) => {
   const customerEmail = `amine+${Date.now()}@example.com`;
   await page.goto("/ar/products/creme-noisettes-rocher");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
@@ -151,9 +130,6 @@ test("the Arabic shop reads right to left, through checkout and email", async ({
 
   await expect(page).toHaveURL(/\/ar\/track\?code=MJ-/);
   await expect(page.getByText("شكرًا! تم تسجيل طلبك.")).toBeVisible();
-  const code = new URL(page.url()).searchParams.get("code")!;
-  // The confirmation email is in Arabic too.
-  await expect.poll(() => inbox(request, customerEmail)).toContain(`تم استلام طلبك ${code}`);
 });
 
 test("the admin panel stays in English and French", async ({ page }) => {

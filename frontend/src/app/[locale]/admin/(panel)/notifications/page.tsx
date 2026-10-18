@@ -255,7 +255,6 @@ function MailServerCard({
   const tCommon = useTranslations("Admin.common");
   const test = useSendTestEmail();
   const [to, setTo] = useState("");
-  const isLocal = ["127.0.0.1", "localhost"].includes(server.host);
 
   function sendTest() {
     const address = to.trim();
@@ -287,22 +286,6 @@ function MailServerCard({
             {!server.enabled && <span className="text-destructive"> ({t("disabled")})</span>}
           </dd>
         </dl>
-        {isLocal && (
-          <p className="rounded-lg bg-soft p-3 text-soft-foreground">
-            {t.rich("localHint", {
-              link: (chunks) => (
-                <a
-                  href="http://localhost:8025"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium underline underline-offset-4"
-                >
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
-        )}
         <Field>
           <FieldLabel htmlFor="test-to">{t("testTo")}</FieldLabel>
           <Input

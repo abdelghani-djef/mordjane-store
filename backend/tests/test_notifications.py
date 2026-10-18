@@ -137,7 +137,7 @@ async def test_low_stock_threshold_is_configurable(
 
 async def test_mail_failure_never_breaks_checkout(client, catalog, monkeypatch):
     async def broken(*args, **kwargs):
-        raise MailError("SMTPConnectError: connection refused")
+        raise MailError("ConnectError: connection refused")
 
     monkeypatch.setattr("app.services.notifications.send_email", broken)
     r = await client.post("/api/orders", json=order_payload((catalog["dark"].id, 1)))
@@ -181,7 +181,7 @@ async def test_send_test_email(admin_client, outbox, monkeypatch):
     assert sent == [(["me@shop.tn"], "fr")]
 
     async def failing(to, lang):
-        raise MailError("SMTPConnectError: connection refused")
+        raise MailError("ConnectError: connection refused")
 
     monkeypatch.setattr("app.services.notifications.send_test", failing)
     r = await admin_client.post("/api/admin/notifications/test", json={"to": ["me@shop.tn"]})
@@ -197,15 +197,17 @@ def test_money_and_weight_formatting():
     assert weight(200, "ar") == "200 غ" and weight(None, "en") == ""
 
 
-def test_helo_hostname_defaults_to_sender_domain(monkeypatch):
+def test_resend_payload_uses_fixed_sender_and_recipient():
     from app import mail
-    from app.config import get_settings
 
-    monkeypatch.setattr(get_settings(), "mail_from", "Mordjane <orders@mordjane.tn>")
-    monkeypatch.setattr(get_settings(), "smtp_helo_hostname", None)
-    assert mail.helo_hostname() == "mordjane.tn"
-    monkeypatch.setattr(get_settings(), "smtp_helo_hostname", "mx.mordjane.tn")
-    assert mail.helo_hostname() == "mx.mordjane.tn"
+    payload = mail.build_payload("Order received", "<p>hi</p>", "hi")
+    assert payload == {
+        "from": "onboarding@resend.dev",
+        "to": "abdelghanismartdrilling@gmail.com",
+        "subject": "Order received",
+        "html": "<p>hi</p>",
+        "text": "hi",
+    }
 
 
 async def test_rendered_emails_contain_only_copy(

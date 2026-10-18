@@ -30,7 +30,7 @@ services:
     depends_on:
       mordjane-db:
         condition: service_healthy
-    # SMTP_* / MAIL_FROM and any other backend settings come straight from .env.
+    # MAIL_ENABLED and any other backend settings come straight from .env.
     env_file:
       - path: .env
         required: false
@@ -40,14 +40,8 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       MEDIA_DIR: /data/media
       PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3000}
-      # Send through Resend (SMTP_USERNAME / SMTP_PASSWORD come from .env) unless .env
-      # points SMTP_* at another server.
+      # Emails go through Resend (configured in backend/app/mail.py).
       MAIL_ENABLED: ${MAIL_ENABLED:-true}
-      MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM in .env}
-      SMTP_HOST: ${SMTP_HOST:-smtp.resend.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
-      SMTP_SSL: ${SMTP_SSL:-false}
     volumes:
       - mordjane-media:/data/media
 
