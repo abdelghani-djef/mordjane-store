@@ -1,4 +1,4 @@
-"""Outgoing email over SMTP (Mailpit in development, a real provider in production)."""
+"""Outgoing email over SMTP (Mailpit in development, Resend in production)."""
 
 import logging
 import time

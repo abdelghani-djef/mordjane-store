@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Initial value only; admins change it under Notifications (stored in the database).
     low_stock_threshold: int = 5
 
-    # Email (Mailpit in development). With SMTP_SSL the connection is TLS from the start
+    # Email (Mailpit in development, Resend in production). With SMTP_SSL the connection is TLS from the start
     # (port 465); with SMTP_STARTTLS it upgrades after connecting (port 587).
     mail_enabled: bool = True
     smtp_host: str = "127.0.0.1"
