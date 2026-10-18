@@ -15,38 +15,92 @@ Built for Tunisia: prices are in **Tunisian dinars** (3 decimals, e.g. `12,500 D
 | Backend  | FastAPI · SQLAlchemy 2 (async) · Alembic · Pydantic v2 · Python 3.14           |
 | Frontend | Next.js 16 (App Router) · shadcn/ui · Tailwind v4 · next-intl · TanStack Query |
 | Database | PostgreSQL 17                                                                  |
-| Dev env  | [devenv](https://devenv.sh) (Nix)                                              |
+| Deploy   | Docker Compose                                                                 |
 
 ## Quick start
 
+The shop runs as four containers:
+
+| Container        | Image                 | Port                                    |
+| ---------------- | --------------------- | --------------------------------------- |
+| `mordjane-db`    | `postgres:17`         | `127.0.0.1:5434` (this machine only)    |
+| `mordjane-api`   | `backend/Dockerfile`  | internal only; runs migrations on start |
+| `mordjane-front` | `frontend/Dockerfile` | `3000` (`FRONT_PORT`)                   |
+| `mordjane-backup`| `postgres:17`         | none; daily database dump (see [Backups](#backups)) |
+
 ```sh
-devenv up -d     # Postgres :5433, FastAPI :8000 (runs migrations), Next.js :3000, Mailpit :8025
-devenv shell     # toolchain + helper scripts below
-seed             # 24 governorates + 279 delegations, categories and the CEBON catalogue
-create-admin     # prompts for email + password (re-run to reset a password)
+cp .env.example .env            # set POSTGRES_PASSWORD, JWT_SECRET, SMTP_*, PUBLIC_SITE_URL
+mkdir -m 700 ~/mordjane_db_backups   # where the daily backups go (only you can open it)
+docker compose up -d --build    # builds the images, migrates the database, starts the shop
 ```
 
+Then load the data (next section) and open:
+
 - Shop: http://localhost:3000
-- Admin panel: http://localhost:3000/en/admin
-- Test inbox (every email the shop sends locally): http://localhost:8025
-- API docs: http://127.0.0.1:8000/docs
+- Admin panel: http://localhost:3000/fr/admin
 
-On entering the shell, devenv installs both dependency sets:
-- `uv sync` puts the backend's packages into `.devenv/state/venv`.
-- `npm install` sets up `frontend/`.
+Notes:
 
-Postgres uses port **5433** because a system Postgres already occupies 5432.
+- **Data** lives in two named volumes: `mordjane-db-data` (Postgres) and `mordjane-media` (uploaded photos). `docker compose down` keeps them; `docker compose down -v` deletes them.
+- **`BACKEND_URL`** is a build argument of the frontend image because Next.js fixes the `/api` and `/media` rewrites at build time. Rebuild `mordjane-front` if the API's address changes.
+- **`COOKIE_SECURE`** defaults to `true`, so serve the shop over HTTPS behind a reverse proxy. Browsers also accept secure cookies on `http://localhost`.
+- **Updating:** `git pull && docker compose up -d --build`. Migrations run when `mordjane-api` starts.
 
-### Helper scripts (inside `devenv shell`)
+## Loading data
 
-| Script         | Does                                                          |
-| -------------- | ------------------------------------------------------------- |
-| `migrate`      | `alembic upgrade head`                                        |
-| `seed`         | load delivery cities + the CEBON catalogue with photos (`--force` adds missing items to a non-empty DB) |
-| `sync-catalog` | apply the CEBON range to an existing shop (see [Catalogue](#catalogue)) |
-| `seed-cities`  | load only the 24 governorates and their 279 delegations (safe for production; adds missing ones, keeps your edits) |
-| `create-admin` | create an admin / reset their password                        |
-| `gen-api`      | regenerate `frontend/src/lib/api-types.ts` from the running API's OpenAPI schema |
+All commands run inside the API container. Add `-T` after `exec` when running them from a script or CI.
+
+### Production
+
+```sh
+# 24 governorates, 279 delegations, 4 categories and the CEBON range (21 products, 64 sizes, photos)
+docker compose exec mordjane-api python -m app.cli seed
+
+# your admin account (prompts for email and password; run it again to reset a password)
+docker compose exec mordjane-api python -m app.cli create-admin
+```
+
+### Demo
+
+```sh
+# everything `seed` loads, plus the demo data in backend/demo_data/
+docker compose exec mordjane-api python -m app.cli seed-demo
+```
+
+The demo adds:
+
+- **42 orders** from the last ~2 months, across 18 governorates and all five statuses: 6 pending, 4 validated, 5 shipped, 22 delivered and 5 cancelled. Each has a full status timeline with staff notes, and customers shopped in French, Arabic or English. Order times are relative to when you load them, so the dashboard always looks current.
+- **A demo admin:** `demo@mordjane.local` / `demo-mordjane`.
+- **Notification settings** with two staff recipients at `@mordjane.local`.
+- **Stock tweaks** so the low-stock list has entries: one size out of stock, three nearly out, and one switched off.
+
+Customer emails are `@example.com` addresses, and loading the demo sends no email. It asks for confirmation (`--yes` skips it) and does nothing if the demo orders are already there.
+
+> **Never run `seed-demo` on the live shop.** The demo admin's password is public in this repository. To start over from a clean database: `docker compose down -v && docker compose up -d`.
+
+### All commands
+
+| Command                                        | Does                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `python -m app.cli seed`                       | delivery cities, delegations and the CEBON catalogue with photos (`--force` adds missing items to a database that already has data) |
+| `python -m app.cli seed-demo`                  | `seed` plus the demo orders, admin, settings and stock tweaks                                |
+| `python -m app.cli seed-cities`                | only the governorates and delegations (adds missing ones, keeps your edits)                  |
+| `python -m app.cli sync-catalog`               | apply the CEBON range to an existing shop (see [Catalogue](#catalogue))                      |
+| `python -m app.cli create-admin`               | create an admin, or reset their password                                                     |
+| `alembic upgrade head`                         | run migrations by hand (`mordjane-api` already does this on start)                           |
+
+Prefix each with `docker compose exec mordjane-api`.
+
+The demo files are plain JSON, so you can edit them:
+
+| File                                         | Contents                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `backend/demo_data/orders.json`              | orders: customer, governorate and delegation, sizes and quantities, status history |
+| `backend/demo_data/admins.json`              | the demo admin                                                           |
+| `backend/demo_data/notification_settings.json` | staff recipients and email switches                                    |
+| `backend/demo_data/stock.json`               | stock and availability overrides per size                                |
+
+Products and sizes are referenced by slug and weight, and places by their French names. Prices and fees are read from the catalogue when the demo loads.
 
 ## Emails
 
@@ -66,19 +120,9 @@ The shop emails customers and staff. Customers give their email at checkout, and
 - **Staff notes** on status changes are never shown to customers.
 - **Sending never slows down or breaks checkout.** Emails go out in the background right after the order is saved. If the mail server is down, the failure is logged and the order still goes through.
 
-### Testing locally with Mailpit
+### SMTP settings
 
-`devenv up` also starts **[Mailpit](https://mailpit.axllent.org)**, a fake mail server. It catches everything on SMTP port 1025 and shows it at **http://localhost:8025**, and nothing is delivered to real inboxes, so any address works. To try it:
-
-1. Place an order in the shop.
-2. Open http://localhost:8025 to see the confirmation, plus the staff email if you've added recipients.
-3. Change the order's status in the admin panel to trigger the status emails.
-
-The end-to-end tests read Mailpit's API to check that the confirmation and "delivered" emails arrive.
-
-### Production SMTP
-
-Point these environment variables at your mail provider (Brevo, Mailgun, Amazon SES, Gmail/Google Workspace, your host's SMTP…):
+Set these in `.env` for your mail provider (Brevo, Mailgun, Amazon SES, Gmail/Google Workspace, your host's SMTP…):
 
 | Variable | Example | Notes |
 | --- | --- | --- |
@@ -94,7 +138,7 @@ Point these environment variables at your mail provider (Brevo, Mailgun, Amazon 
 ## How it fits together
 
 ```
-browser ──► Next.js :3000 ──rewrite /api/*, /media/* ──► FastAPI :8000 ──► Postgres :5433
+browser ──► mordjane-front :3000 ──rewrite /api/*, /media/* ──► mordjane-api :8000 ──► mordjane-db :5432
               │ server components fetch FastAPI directly (BACKEND_URL, no-store)
 ```
 
@@ -131,35 +175,40 @@ The catalogue is the CEBON range (cebon.dz): 21 products and 64 sizes, with the 
 Governorates, their fees and their delegations are data, managed in the admin panel rather than in config. The delegation list is the 2024 census list (279 delegations, from Wikipedia's « Délégation (Tunisie) »), with English and Arabic names from Wikidata; it lives in `backend/app/seed_delegations.py`.
 
 
-Backend settings (`backend/app/config.py`) come from environment variables; devenv sets the dev values.
+Backend settings (`backend/app/config.py`) come from environment variables. Set them in `.env` (see `.env.example`); `docker-compose.yml` sets the ones that depend on the containers.
 
-| Variable             | Default (dev)                        | Notes                                    |
-| -------------------- | ------------------------------------ | ---------------------------------------- |
-| `DATABASE_URL`       | `postgresql+asyncpg://…:5433/mordjane` |                                        |
-| `JWT_SECRET`         | dev value                            | **set a long random value in production** |
-| `COOKIE_SECURE`      | `false`                              | **`true` in production (HTTPS)**          |
-| `CURRENCY`           | `TND`                                | the UI label is `NEXT_PUBLIC_CURRENCY_LABEL` (`DT`); amounts use 3 decimals |
-| `LOW_STOCK_THRESHOLD`| `5`                                  | starting value only; admins change it under Notifications |
-| `MEDIA_DIR`          | `.devenv/state/media`                | uploaded images                           |
-| `BACKEND_URL`        | `http://127.0.0.1:8000`              | read by Next.js for rewrites + server fetches |
+| Variable             | In Docker                                  | Notes                                    |
+| -------------------- | ------------------------------------------ | ---------------------------------------- |
+| `POSTGRES_PASSWORD`  | **required**                               | also `POSTGRES_DB` / `POSTGRES_USER` (default `mordjane`) |
+| `DATABASE_URL`       | built from the `POSTGRES_*` values         | points at `mordjane-db`                  |
+| `JWT_SECRET`         | **required**                               | a long random value: `openssl rand -hex 32` |
+| `COOKIE_SECURE`      | `true`                                     | needs HTTPS (or `http://localhost`)      |
+| `CURRENCY`           | `TND`                                      | the UI label is `NEXT_PUBLIC_CURRENCY_LABEL` (`DT`); amounts use 3 decimals |
+| `LOW_STOCK_THRESHOLD`| `5`                                        | starting value only; admins change it under Notifications |
+| `MEDIA_DIR`          | `/data/media` (volume `mordjane-media`)    | uploaded images                           |
+| `BACKEND_URL`        | `http://mordjane-api:8000` (build arg)     | read by Next.js for rewrites + server fetches |
+| `FRONT_PORT`         | `3000`                                     | host port of the shop                    |
 
 ## Tests & checks
 
 ```sh
-# backend: 64 tests against the mordjane_test DB
-(cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .)
+# backend: 85 tests against a throwaway Postgres (needs uv and Python 3.14)
+docker run -d --rm --name mordjane-testdb -p 127.0.0.1:5435:5432 \
+  -e POSTGRES_USER=mordjane -e POSTGRES_PASSWORD=mordjane -e POSTGRES_DB=mordjane_test postgres:17
+(cd backend && TEST_DATABASE_URL=postgresql+asyncpg://mordjane:mordjane@127.0.0.1:5435/mordjane_test \
+  uv run pytest && uv run ruff check . && uv run ruff format --check .)
+docker stop mordjane-testdb
 # covers: server-side pricing, oversell 409, concurrent last-unit race,
 # status transitions, cancel restock, auth, uploads, delivery-city fees & rules,
-# emails (languages, RTL Arabic, switches, low stock)
+# emails (languages, RTL Arabic, switches, low stock), demo data
 
 # frontend
 (cd frontend && npm run lint && npm run typecheck && npm run build)
 
-# end-to-end (needs `devenv up`, `seed` and an admin)
+# end-to-end, against a running shop with `seed` and an admin
 (cd frontend && npx playwright install chromium && npm run e2e)
-# E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD default to admin@mordjane.local / choco-admin-dev
-
-devenv test      # boots Postgres, checks toolchain versions, runs the backend suite
+# E2E_BASE_URL (http://127.0.0.1:3000), E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD, and
+# E2E_MAILPIT_URL: the email checks read a Mailpit inbox the shop's SMTP must point at
 ```
 
 ## Schema changes
@@ -170,34 +219,33 @@ cd backend
 uv run alembic revision --autogenerate -m "describe change"
 uv run alembic upgrade head
 uv run alembic check          # model ↔ migration drift
-gen-api                       # refresh frontend types if the API changed
 ```
 
-## Docker
+If the API changed, refresh the frontend types with `cd frontend && BACKEND_URL=<api address> npm run gen:api`. In Docker the API has no host port; for example, run `docker compose exec -T mordjane-api python -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > /tmp/openapi.json` and point `openapi-typescript` at that file.
 
-`docker-compose.yml` runs the shop as three containers. Local development still uses devenv.
+## Backups
 
-| Container        | Image                     | Port                                  |
-| ---------------- | ------------------------- | ------------------------------------- |
-| `mordjane-db`    | `postgres:17`             | `127.0.0.1:5434` (host only)          |
-| `mordjane-api`   | `backend/Dockerfile`      | internal only; runs migrations on start |
-| `mordjane-front` | `frontend/Dockerfile`     | `3000` (`FRONT_PORT`)                 |
+`mordjane-backup` dumps the database every day at **midnight (Tunis time)** to `~/mordjane_db_backups` on the host, as `mordjane-YYYY-MM-DD.dump`, and deletes dumps older than 14 days. The dumps are compressed `pg_dump` files and hold customer names, phones and addresses, so keep the folder private and copy it off the server regularly.
 
 ```sh
-cp .env.example .env    # set POSTGRES_PASSWORD, JWT_SECRET, SMTP_*, PUBLIC_SITE_URL
-docker compose up -d --build
-docker compose exec mordjane-api python -m app.cli seed
-docker compose exec mordjane-api python -m app.cli create-admin
+docker compose logs mordjane-backup     # "backup done: …" after each run
+
+# back up right now
+docker compose exec mordjane-backup sh -c 'pg_dump --format=custom --file=/backups/mordjane-$(date +%F-%H%M).dump'
+
+# restore a dump (replaces the current data)
+docker compose stop mordjane-api
+docker compose exec mordjane-backup pg_restore --clean --if-exists --no-owner -d mordjane /backups/mordjane-2026-10-18.dump
+docker compose up -d
 ```
 
-- **Data** lives in two named volumes: `mordjane-db-data` (Postgres) and `mordjane-media` (uploaded photos).
-- **`BACKEND_URL`** is a build argument of the frontend image because Next.js fixes the `/api` and `/media` rewrites at build time. Rebuild `mordjane-front` if the API's address changes.
-- **`COOKIE_SECURE`** defaults to `true`, so serve the shop over HTTPS behind a reverse proxy. Browsers also accept secure cookies on `http://localhost`.
+The dumps are owned by root, but you can read, copy and delete them because the folder is yours. To change the time, folder or how many days are kept, edit the `mordjane-backup` service in `docker-compose.yml`. Product photos are not in the dump; they live in the `mordjane-media` volume.
 
 ## Before going to production
 
-- Set `JWT_SECRET` and `COOKIE_SECURE=true`, and serve everything over HTTPS.
+- Set `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`, and serve everything over HTTPS (keep `COOKIE_SECURE=true`).
+- Load data with `seed` and `create-admin`, never `seed-demo`.
 - Add rate limiting on `POST /api/admin/auth/login` and `POST /api/orders`, at the reverse proxy or with middleware.
-- Put `MEDIA_DIR` on persistent storage, or move uploads to object storage.
+- Copy `~/mordjane_db_backups` off the server regularly (see [Backups](#backups)), and back up the `mordjane-media` volume (product photos) too.
 - Review product prices and stock under **Admin → Products**. The supplier doesn't publish prices, so sizes added from the CEBON range have estimated prices and placeholder stock.
 - Review the delivery fees under **Admin → Delivery cities**. The seeded fees are placeholders: 7 DT for Grand Tunis, 8 DT for the north and centre, 9 DT for the south.

@@ -1,0 +1,13 @@
+{
+  "admin_recipients": ["orders@mordjane.local", "stock@mordjane.local"],
+  "admin_language": "fr",
+  "low_stock_threshold": 5,
+  "notify_admin_new_order": true,
+  "notify_admin_status_change": true,
+  "notify_admin_low_stock": true,
+  "notify_customer_confirmation": true,
+  "notify_customer_validated": false,
+  "notify_customer_shipped": true,
+  "notify_customer_delivered": true,
+  "notify_customer_cancelled": true
+}

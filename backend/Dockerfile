@@ -19,6 +19,7 @@ COPY alembic.ini ./
 COPY alembic ./alembic
 COPY app ./app
 COPY seed_media ./seed_media
+COPY demo_data ./demo_data
 
 # Create the media dir owned by the app user so a fresh named volume inherits that ownership.
 RUN useradd --system --uid 1000 --home /app app \

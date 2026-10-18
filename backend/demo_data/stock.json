@@ -1,0 +1,7 @@
+[
+  {"product": "creme-noisettes-rocher", "grams": 2500, "stock": 2},
+  {"product": "pate-a-tartiner", "grams": 12000, "stock": 1},
+  {"product": "trimoline", "grams": 15000, "stock": 3},
+  {"product": "glacage-chocolat-blanc", "grams": 250, "stock": 0},
+  {"product": "smen", "grams": 9000, "stock": 4, "is_available": false}
+]

@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config import get_settings
 from app.db import SessionLocal, engine
+from app.demo import DemoDataError, load_demo
 from app.media import delete_image
 from app.models import AdminUser, Category, Delegation, DeliveryCity, Product, ProductVariant
 from app.security import hash_password
@@ -332,6 +333,37 @@ async def _seed_cities_only() -> None:
 def seed_cities():
     """Load only the Tunisian governorates and their delegations (safe for production)."""
     run(_seed_cities_only())
+
+
+async def _seed_demo() -> None:
+    await _seed(force=False)
+    async with SessionLocal() as session:
+        try:
+            loaded = await load_demo(session)
+        except DemoDataError as exc:
+            raise typer.BadParameter(str(exc)) from exc
+    if loaded is None:
+        typer.echo("Demo orders are already loaded.")
+        return
+    typer.echo(
+        f"Loaded {loaded['orders']} demo orders, {loaded['admins']} demo admin and "
+        f"{loaded['stock']} stock adjustments."
+    )
+
+
+@cli.command("seed-demo")
+def seed_demo(yes: bool = typer.Option(False, "--yes", help="Skip the confirmation")):
+    """Load the seed data plus the demo orders, demo admin and settings from demo_data/.
+
+    For demos and testing only: the demo admin's password is public in the repository.
+    """
+    if not yes:
+        typer.confirm(
+            "This adds demo orders and a demo admin whose password is public. "
+            "Never run it on a live shop. Continue?",
+            abort=True,
+        )
+    run(_seed_demo())
 
 
 async def _create_admin(email: str, password: str) -> None:
