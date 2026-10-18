@@ -13,10 +13,20 @@ from app.config import get_settings
 from app.db import SessionLocal, engine
 from app.demo import DemoDataError, load_demo
 from app.media import delete_image
-from app.models import AdminUser, Category, Delegation, DeliveryCity, Product, ProductVariant
+from app.models import (
+    AdminUser,
+    Category,
+    Delegation,
+    DeliveryCity,
+    Pack,
+    PackItem,
+    Product,
+    ProductVariant,
+)
 from app.security import hash_password
 from app.seed_catalog import BRAND, PRODUCTS, STORAGE, SeedProduct
 from app.seed_delegations import DELEGATIONS
+from app.seed_packs import PACKS
 
 cli = typer.Typer(no_args_is_help=True)
 
@@ -213,6 +223,34 @@ def _new_product(item: SeedProduct, category: Category) -> Product:
     )
 
 
+async def _seed_packs(session) -> int:
+    """Add the promotional offers that aren't there yet (matched on slug)."""
+    rows = await session.scalars(
+        select(ProductVariant).options(selectinload(ProductVariant.product))
+    )
+    sizes = {(v.product.slug, v.weight_grams): v.id for v in rows}
+    existing = set(await session.scalars(select(Pack.slug)))
+    created = 0
+    for item in PACKS:
+        if item.slug in existing:
+            continue
+        session.add(
+            Pack(
+                slug=item.slug,
+                name_en=item.name.en,
+                name_fr=item.name.fr,
+                name_ar=item.name.ar,
+                price=Decimal(item.price),
+                is_featured=item.featured,
+                sort_order=item.number,
+                items=[PackItem(variant_id=sizes[size], quantity=1) for size in item.items],
+            )
+        )
+        created += 1
+    await session.commit()
+    return created
+
+
 async def _seed(force: bool) -> None:
     async with SessionLocal() as session:
         typer.echo(f"Seeded {await _seed_cities(session)} delivery cities.")
@@ -233,12 +271,13 @@ async def _seed(force: bool) -> None:
             created += 1
         await session.commit()
         typer.echo(f"Seeded {len(categories)} categories and {created} products.")
+        typer.echo(f"Seeded {await _seed_packs(session)} packs.")
         typer.echo(f"Added Arabic copy to {await _fill_arabic(session)} rows.")
 
 
 @cli.command()
 def seed(force: bool = typer.Option(False, help="Add missing items even if data exists")):
-    """Load delivery cities plus the categories and the CEBON product range."""
+    """Load delivery cities plus the categories, the CEBON product range and the offers."""
     run(_seed(force))
 
 
@@ -345,10 +384,7 @@ async def _seed_demo() -> None:
     if loaded is None:
         typer.echo("Demo data is already loaded.")
         return
-    typer.echo(
-        f"Loaded {loaded['admins']} demo admin, {loaded['stock']} stock adjustments "
-        f"and {loaded['packs']} packs."
-    )
+    typer.echo(f"Loaded {loaded['admins']} demo admin and {loaded['stock']} stock adjustments.")
 
 
 @cli.command("seed-demo")

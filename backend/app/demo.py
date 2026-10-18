@@ -1,15 +1,14 @@
-"""Demo data: a demo admin, notification settings, a few stock tweaks and some packs, loaded
-from the JSON files in demo_data/ on top of the seeded catalogue. It creates no orders.
+"""Demo data: a demo admin, notification settings and a few stock tweaks, loaded from the JSON
+files in demo_data/ on top of the seeded catalogue. It creates no orders.
 """
 
 import json
-from decimal import Decimal
 from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.models import AdminUser, Pack, PackItem, ProductVariant
+from app.models import AdminUser, ProductVariant
 from app.security import hash_password
 from app.services.notifications import get_notification_settings
 
@@ -61,16 +60,5 @@ async def load_demo(session) -> dict[str, int] | None:
         variant.stock = entry["stock"]
         variant.is_available = entry.get("is_available", True)
 
-    packs = _load("packs.json")
-    for entry in packs:
-        items = [
-            PackItem(
-                variant_id=_variant(variants, item["product"], item["grams"]).id,
-                quantity=item["quantity"],
-            )
-            for item in entry.pop("items")
-        ]
-        session.add(Pack(**{**entry, "price": Decimal(entry["price"])}, items=items))
-
     await session.commit()
-    return {"admins": len(admins), "stock": len(stock), "packs": len(packs)}
+    return {"admins": len(admins), "stock": len(stock)}

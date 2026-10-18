@@ -72,7 +72,6 @@ The demo adds no orders. It adds:
 - **A demo admin:** `demo@mordjane.local` / `demo-mordjane`.
 - **Notification settings** with two staff recipients at `@mordjane.local`.
 - **Stock tweaks** so the low-stock list has entries: one size out of stock, three nearly out, and one switched off.
-- **Four packs**, three of them featured on the home page.
 
 It asks for confirmation (`--yes` skips it) and does nothing if the demo admin already exists.
 
@@ -82,8 +81,8 @@ It asks for confirmation (`--yes` skips it) and does nothing if the demo admin a
 
 | Command                                        | Does                                                                                        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `python -m app.cli seed`                       | delivery cities, delegations and the CEBON catalogue with photos (`--force` adds missing items to a database that already has data) |
-| `python -m app.cli seed-demo`                  | `seed` plus the demo admin, settings, stock tweaks and packs (no orders)                     |
+| `python -m app.cli seed`                       | delivery cities, delegations, the CEBON catalogue with photos and the 12 promotional offers (`--force` adds missing items to a database that already has data) |
+| `python -m app.cli seed-demo`                  | `seed` plus the demo admin, settings and stock tweaks (no orders)                            |
 | `python -m app.cli seed-cities`                | only the governorates and delegations (adds missing ones, keeps your edits)                  |
 | `python -m app.cli sync-catalog`               | apply the CEBON range to an existing shop (see [Catalogue](#catalogue))                      |
 | `python -m app.cli create-admin`               | create an admin, or reset their password                                                     |
@@ -98,13 +97,14 @@ The demo files are plain JSON, so you can edit them:
 | `backend/demo_data/admins.json`              | the demo admin                                                           |
 | `backend/demo_data/notification_settings.json` | staff recipients and email switches                                    |
 | `backend/demo_data/stock.json`               | stock and availability overrides per size                                |
-| `backend/demo_data/packs.json`               | the demo packs and what's in each box                                    |
 
 Product sizes are referenced by product slug and weight.
 
 ## Packs
 
 A pack is a box of several sizes sold together for less than buying them one by one, e.g. 2 × peanut cream 200 g + hazelnut cream 200 g.
+
+`seed` loads the shop's 12 promotional offers (« Offre 1 » to « Offre 12 », from 50 to 104 DT), with offers 1, 8 and 12 on the home page. They live in `backend/app/seed_packs.py`. Their "instead of" prices come from the jars' prices in `backend/app/seed_catalog.py`: 350 g hazelnut cream 25 DT, 350 g cocoa hazelnut 23 DT, 200 g rocher 22 DT (hazelnut) and 20 DT (cocoa), 600 g rocher 42 DT (hazelnut) and 33 DT (cocoa).
 
 - **Admin → Packs** creates them. Choose the sizes and how many of each go in the box (at least 2 items in total), then type the pack price. The form shows what the items cost bought separately and how much customers save. A pack must cost less than its items bought separately. A photo of the box is optional: without one, the shop draws the box open with its items' photos.
 - **In the shop:** packs have their own page (`/packs`) and link in the header. Each pack shows its price, the separate price struck through, and the saving. Packs switched to *On home page* appear right under the hero.
@@ -200,7 +200,7 @@ Backend settings (`backend/app/config.py`) come from environment variables. Set 
 ## Tests & checks
 
 ```sh
-# backend: 109 tests against a throwaway Postgres (needs uv and Python 3.14)
+# backend: 110 tests against a throwaway Postgres (needs uv and Python 3.14)
 docker run -d --rm --name mordjane-testdb -p 127.0.0.1:5445:5432 \
   -e POSTGRES_USER=mordjane -e POSTGRES_PASSWORD=mordjane -e POSTGRES_DB=mordjane_test postgres:17
 (cd backend && TEST_DATABASE_URL=postgresql+asyncpg://mordjane:mordjane@127.0.0.1:5445/mordjane_test \

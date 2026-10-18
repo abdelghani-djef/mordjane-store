@@ -23,7 +23,7 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page }
   await page.locator("label", { hasText: "600 g" }).click();
   await expect(page.getByRole("radio", { name: /^600 g/ })).toBeChecked();
   // Price and stock follow the chosen size.
-  await expect(page.locator(".price", { hasText: "22.500 DT" })).toBeVisible();
+  await expect(page.locator(".price", { hasText: "42.000 DT" })).toBeVisible();
   // First match is the main product; related-product cards below have their own buttons.
   await page.getByRole("button", { name: "Add to cart" }).first().click();
   await expect(page.getByText("Added to cart").first()).toBeVisible();
@@ -35,12 +35,12 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page }
   // --- cart → checkout ----------------------------------------------------------------------
   await page.goto("/en/cart");
   await expect(page.getByRole("link", { name: "Crunchy hazelnut cream" })).toBeVisible();
-  await expect(page.getByText("22.500 DT / 600 g")).toBeVisible();
+  await expect(page.getByText("42.000 DT / 600 g")).toBeVisible();
   await expect(page.getByRole("link", { name: "Hazelnut cream", exact: true })).toBeVisible();
   await expect(page.getByText("7.900 DT / 200 g")).toBeVisible();
-  // 22.500 + 2 × 7.900; delivery depends on the city, chosen at checkout
+  // 42.000 + 2 × 7.900; delivery depends on the city, chosen at checkout
   await expect(page.getByText("Calculated at checkout")).toBeVisible();
-  await expect(page.getByText("38.300 DT").first()).toBeVisible();
+  await expect(page.getByText("57.800 DT").first()).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "Checkout" }).click();
 
   await expect(page).toHaveURL(/\/en\/checkout$/);
@@ -56,8 +56,8 @@ test("customer orders, admin fulfils, customer tracks delivery", async ({ page }
   await expect(page.getByRole("combobox", { name: "Delegation" })).toBeDisabled();
   await page.getByRole("combobox", { name: "Governorate" }).click();
   await page.getByRole("option", { name: /^Sousse/ }).click();
-  // Sousse delivers for 8.000 DT → 38.300 + 8.000
-  await expect(page.getByText("46.300 DT")).toBeVisible();
+  // Sousse delivers for 8.000 DT → 57.800 + 8.000
+  await expect(page.getByText("65.800 DT")).toBeVisible();
   await page.getByRole("button", { name: "Place order" }).click();
   await expect(page.getByText("Please choose your delegation.")).toBeVisible();
   await page.getByRole("combobox", { name: "Delegation" }).click();
@@ -109,7 +109,7 @@ test("the Arabic shop reads right to left, through checkout", async ({ page }) =
     page.getByRole("heading", { level: 1, name: "كريمة البندق المحمص المقرمشة" }),
   ).toBeVisible();
   // Western digits, Tunisian separators, Arabic currency and units.
-  await expect(page.locator(".price", { hasText: "8,900 د.ت" })).toBeVisible();
+  await expect(page.locator(".price", { hasText: "22,000 د.ت" })).toBeVisible();
   await expect(page.getByRole("radio", { name: /^200 غ/ })).toBeChecked();
   await page.getByRole("button", { name: "أضف إلى السلة" }).first().click();
   await expect(page.getByText("أُضيف إلى السلة").first()).toBeVisible();
@@ -123,8 +123,8 @@ test("the Arabic shop reads right to left, through checkout", async ({ page }) =
   await page.getByRole("option", { name: /^سوسة/ }).click();
   await page.getByRole("combobox", { name: "المعتمدية" }).click();
   await page.getByRole("option", { name: "حمام سوسة" }).click();
-  // 8.900 + 8.000 delivery to Sousse
-  await expect(page.getByText("16,900 د.ت").first()).toBeVisible();
+  // 22.000 + 8.000 delivery to Sousse
+  await expect(page.getByText("30,000 د.ت").first()).toBeVisible();
   await page.getByRole("button", { name: "تأكيد الطلب" }).click();
 
   await expect(page).toHaveURL(/\/ar\/track\?code=MJ-/);

@@ -3,7 +3,9 @@
 Copy (French, English, Arabic), sizes and shelf lives come from the supplier's site
 (cebon.dz); each size has its photo in seed_media/products/<slug>/<grams>.webp and the
 product's listing photo is seed_media/products/<slug>.webp. Prices and stock are starting
-values: review them in the admin panel.
+values: review them in the admin panel. The 350 g hazelnut and cocoa creams and the 200 g and
+600 g rocher jars carry the shop's real prices, the ones its promotional offers (seed_packs.py)
+are measured against.
 """
 
 from dataclasses import dataclass
@@ -108,7 +110,7 @@ PRODUCTS: tuple[SeedProduct, ...] = (
         shelf_life_months=12,
         sizes=(
             Size(200, "6.900", 40),
-            Size(350, "11.500", 40),
+            Size(350, "23.000", 40),
             Size(700, "20.900", 40),
             Size(2500, "64.000", 12),
             Size(12000, "285.000", 4),
@@ -161,7 +163,7 @@ PRODUCTS: tuple[SeedProduct, ...] = (
         shelf_life_months=12,
         sizes=(
             Size(200, "7.900", 40),
-            Size(350, "12.900", 40),
+            Size(350, "25.000", 40),
             Size(700, "23.500", 40),
             Size(2500, "72.000", 12),
             Size(12000, "320.000", 4),
@@ -263,8 +265,8 @@ PRODUCTS: tuple[SeedProduct, ...] = (
         ),
         shelf_life_months=12,
         sizes=(
-            Size(200, "7.900", 40),
-            Size(600, "19.900", 40),
+            Size(200, "20.000", 40),
+            Size(600, "33.000", 40),
             Size(2500, "69.000", 12),
         ),
         featured=True,
@@ -316,8 +318,8 @@ PRODUCTS: tuple[SeedProduct, ...] = (
         ),
         shelf_life_months=12,
         sizes=(
-            Size(200, "8.900", 40),
-            Size(600, "22.500", 40),
+            Size(200, "22.000", 40),
+            Size(600, "42.000", 40),
             Size(2500, "79.000", 12),
         ),
         featured=True,
