@@ -39,7 +39,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       MEDIA_DIR: /data/media
-      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3000}
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-https://elmordjane.kwin.tn}
       # Emails go through Resend (configured in backend/app/mail.py).
       MAIL_ENABLED: ${MAIL_ENABLED:-true}
     volumes:

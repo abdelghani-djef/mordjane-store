@@ -33,6 +33,8 @@ async def send_email(to: list[str], subject: str, html: str, text: str) -> None:
     if not settings.mail_enabled:
         log.info("Mail disabled; not sending %r to %s", subject, to)
         return
+    if not settings.resend_api_key:
+        raise MailError("RESEND_API_KEY is not set in .env")
     started = time.perf_counter()
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:

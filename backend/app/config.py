@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Secret: set RESEND_API_KEY in .env, never in the code.
     resend_api_key: str = ""
     # Base URL of the storefront, for links in emails (tracking page, admin order page).
-    public_site_url: str = "http://localhost:3000"
+    public_site_url: str = "https://elmordjane.kwin.tn"
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     max_upload_bytes: int = 5 * 1024 * 1024
 
