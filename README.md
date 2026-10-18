@@ -132,11 +132,11 @@ The shop emails customers and staff. Customers give their email at checkout, and
 
 ### Sending email
 
-The shop sends through [Resend](https://resend.com)'s HTTP API, in development too. Customer emails go to the address the customer typed at checkout; staff emails go to the recipients set under **Admin → Notifications**. The sender is `onboarding@resend.dev` (`RESEND_FROM` in `backend/app/mail.py`). The API key goes in `.env` as `RESEND_API_KEY` (the repository root's `.env` for Docker, `backend/.env` for local development); never commit it, GitHub refuses pushes that contain it.
+The shop sends through a Gmail account (`smtp.gmail.com`, see `backend/app/mail.py`), in development too. Customer emails go to the address the customer typed at checkout; staff emails go to the recipients set under **Admin → Notifications**. The sender is the Gmail account itself.
 
-- **Resend's `onboarding@resend.dev` sender only delivers to your own Resend account's address;** Resend refuses other recipients until a domain is verified in Resend (*Domains*).
-- **Limit:** the free plan sends 3,000 emails a month, at most 100 a day, development included. Set `MAIL_ENABLED=false` to log emails instead of sending them.
-- **Check it:** **Admin → Notifications → Send test email**. `docker compose logs mordjane-api | grep mordjane.mail` shows each send or Resend's error; Resend's *Emails* page shows what happened after that.
+- **Setup:** in the Google account, turn on 2-Step Verification, then create an app password (*Google Account → Security → App passwords*). Put `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD` in `.env` (the repository root's `.env` for Docker, `backend/.env` for local development); never commit the password.
+- **Limit:** Gmail sends about 500 emails a day, development included. Set `MAIL_ENABLED=false` to log emails instead of sending them.
+- **Check it:** **Admin → Notifications → Send test email**. `docker compose logs mordjane-api | grep mordjane.mail` shows each send or Gmail's error; the account's *Sent* folder shows what went out.
 
 ## How it fits together
 
@@ -247,7 +247,7 @@ The dumps are owned by root, but you can read, copy and delete them because the 
 
 - Set `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`, and serve everything over HTTPS (keep `COOKIE_SECURE=true`).
 - Load data with `seed` and `create-admin`, never `seed-demo`.
-- Verify a domain in Resend so customers get their own emails, and check that a test email arrives (see [Sending email](#sending-email)).
+- Set the Gmail account in `.env` and check that a test email arrives (see [Sending email](#sending-email)).
 - Add rate limiting on `POST /api/admin/auth/login` and `POST /api/orders`, at the reverse proxy or with middleware.
 - Copy `~/mordjane_db_backups` off the server regularly (see [Backups](#backups)), and back up the `mordjane-media` volume (product photos) too.
 - Review product prices and stock under **Admin → Products**. The supplier doesn't publish prices, so sizes added from the CEBON range have estimated prices and placeholder stock.

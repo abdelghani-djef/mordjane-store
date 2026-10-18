@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db import get_session
-from app.mail import RESEND_FROM, MailError
+from app.mail import SMTP_HOST, SMTP_PORT, MailError
 from app.schemas.notifications import (
     MailServerOut,
     NotificationSettingsIn,
@@ -28,9 +28,9 @@ def _out(row) -> NotificationSettingsOut:
     out = NotificationSettingsOut.model_validate(row)
     out.mail_server = MailServerOut(
         enabled=settings.mail_enabled,
-        host="api.resend.com",
-        port=443,
-        sender=RESEND_FROM,
+        host=SMTP_HOST,
+        port=SMTP_PORT,
+        sender=settings.gmail_address or "—",
     )
     return out
 

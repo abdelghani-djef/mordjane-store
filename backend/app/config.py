@@ -16,10 +16,12 @@ class Settings(BaseSettings):
     # Initial value only; admins change it under Notifications (stored in the database).
     low_stock_threshold: int = 5
 
-    # Email goes through Resend (see app/mail.py); false logs emails instead of sending them.
+    # Email goes through Gmail (see app/mail.py); false logs emails instead of sending them.
     mail_enabled: bool = True
-    # Secret: set RESEND_API_KEY in .env, never in the code.
-    resend_api_key: str = ""
+    # The Gmail account that sends every email; it is also the sender address.
+    gmail_address: str = ""
+    # Secret: a Google app password, set GMAIL_APP_PASSWORD in .env, never in the code.
+    gmail_app_password: str = ""
     # Base URL of the storefront, for links in emails (tracking page, admin order page).
     public_site_url: str = "https://elmordjane.kwin.tn"
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]

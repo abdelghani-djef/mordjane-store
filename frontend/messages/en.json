@@ -560,7 +560,7 @@
       "save": "Save changes",
       "saved": "Notification settings saved",
       "serverTitle": "Mail server",
-      "serverHint": "Sent through Resend.",
+      "serverHint": "Sent through Gmail.",
       "sender": "Sender",
       "server": "Server",
       "disabled": "sending disabled",

@@ -51,7 +51,7 @@ async def _clean_tables():
 
 @pytest.fixture(autouse=True)
 def outbox(monkeypatch):
-    """Capture outgoing email instead of calling Resend."""
+    """Capture outgoing email instead of sending it through Gmail."""
     sent: list[dict] = []
 
     async def fake_send(to, subject, html, text):

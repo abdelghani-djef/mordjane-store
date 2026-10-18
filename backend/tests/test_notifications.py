@@ -197,17 +197,17 @@ def test_money_and_weight_formatting():
     assert weight(200, "ar") == "200 غ" and weight(None, "en") == ""
 
 
-def test_resend_payload_goes_to_the_given_recipients():
+def test_message_goes_to_the_given_recipients():
     from app import mail
 
-    payload = mail.build_payload(["boss@shop.tn", "stock@shop.tn"], "Low stock", "<p>hi</p>", "hi")
-    assert payload == {
-        "from": "onboarding@resend.dev",
-        "to": ["boss@shop.tn", "stock@shop.tn"],
-        "subject": "Low stock",
-        "html": "<p>hi</p>",
-        "text": "hi",
-    }
+    message = mail.build_message(
+        "shop@gmail.com", ["boss@shop.tn", "stock@shop.tn"], "Low stock", "<p>hi</p>", "hi"
+    )
+    assert message["From"] == "shop@gmail.com"
+    assert message["To"] == "boss@shop.tn, stock@shop.tn"
+    assert message["Subject"] == "Low stock"
+    assert message.get_body(("plain",)).get_content() == "hi\n"
+    assert message.get_body(("html",)).get_content() == "<p>hi</p>\n"
 
 
 async def test_rendered_emails_contain_only_copy(
@@ -277,3 +277,42 @@ async def test_orders_from_before_delegations_show_just_the_city(
     assert "Bourguiba, La Marsa<br>Tunis<br>" in customer["html"]
     [staff] = [m for m in outbox if m["to"] == staff_inboxes]
     assert "Bourguiba, La Marsa / Tunis\n" in staff["text"]
+
+
+async def test_gmail_receives_the_checkout_email_and_the_staff_recipients(
+    client, catalog, staff_inboxes, monkeypatch
+):
+    """End to end through the real mail code, with only the connection to Gmail intercepted."""
+    from app import mail
+    from app.config import get_settings
+
+    sent: list[tuple[tuple[str, str], object]] = []
+
+    class FakeGmail:
+        def __init__(self, host, port, **kwargs):
+            assert (host, port) == ("smtp.gmail.com", 465)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return None
+
+        def login(self, user, password):
+            self.login_as = (user, password)
+
+        def send_message(self, message):
+            sent.append((self.login_as, message))
+            return {}
+
+    monkeypatch.setattr(mail.smtplib, "SMTP_SSL", FakeGmail)
+    monkeypatch.setattr("app.services.notifications.send_email", mail.send_email)
+    monkeypatch.setattr(get_settings(), "mail_enabled", True)
+    monkeypatch.setattr(get_settings(), "gmail_address", "shop@gmail.com")
+    monkeypatch.setattr(get_settings(), "gmail_app_password", "abcd efgh ijkl mnop")
+
+    await _place(client, (catalog["dark"].id, 1), email="yasmine@client.tn")
+
+    assert sorted(m["To"] for _, m in sent) == ["boss@shop.tn, stock@shop.tn", "yasmine@client.tn"]
+    assert all(m["From"] == "shop@gmail.com" for _, m in sent)
+    assert all(login == ("shop@gmail.com", "abcdefghijklmnop") for login, _ in sent)

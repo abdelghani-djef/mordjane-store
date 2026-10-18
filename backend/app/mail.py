@@ -1,31 +1,42 @@
-"""Outgoing email through Resend's HTTP API."""
+"""Outgoing email through Gmail's SMTP server, logged in with a Google app password."""
 
+import asyncio
 import logging
+import smtplib
+import ssl
 import time
-
-import httpx
+from email.message import EmailMessage
 
 from app.config import get_settings
 
 log = logging.getLogger("mordjane.mail")
 
-RESEND_URL = "https://api.resend.com/emails"
-RESEND_FROM = "onboarding@resend.dev"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 465
 TIMEOUT_SECONDS = 15
 
 
 class MailError(Exception):
-    """Resend refused the message or couldn't be reached."""
+    """Gmail refused the message or couldn't be reached."""
 
 
-def build_payload(to: list[str], subject: str, html: str, text: str) -> dict:
-    return {
-        "from": RESEND_FROM,
-        "to": to,
-        "subject": subject,
-        "html": html,
-        "text": text,
-    }
+def build_message(sender: str, to: list[str], subject: str, html: str, text: str) -> EmailMessage:
+    message = EmailMessage()
+    message["From"] = sender
+    message["To"] = ", ".join(to)
+    message["Subject"] = subject
+    message.set_content(text)
+    message.add_alternative(html, subtype="html")
+    return message
+
+
+def _send(message: EmailMessage, address: str, password: str) -> None:
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=TIMEOUT_SECONDS, context=context) as smtp:
+        smtp.login(address, password)
+        refused = smtp.send_message(message)
+    if refused:
+        raise MailError(f"Gmail refused {', '.join(refused)}")
 
 
 async def send_email(to: list[str], subject: str, html: str, text: str) -> None:
@@ -36,18 +47,14 @@ async def send_email(to: list[str], subject: str, html: str, text: str) -> None:
     if not settings.mail_enabled:
         log.info("Mail disabled; not sending %r to %s", subject, to)
         return
-    if not settings.resend_api_key:
-        raise MailError("RESEND_API_KEY is not set in .env")
+    if not (settings.gmail_address and settings.gmail_app_password):
+        raise MailError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set in .env")
+    message = build_message(settings.gmail_address, to, subject, html, text)
+    # Google shows app passwords in groups of four ("abcd efgh ijkl mnop").
+    password = settings.gmail_app_password.replace(" ", "")
     started = time.perf_counter()
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-            response = await client.post(
-                RESEND_URL,
-                headers={"Authorization": f"Bearer {settings.resend_api_key}"},
-                json=build_payload(to, subject, html, text),
-            )
-    except httpx.HTTPError as exc:
+        await asyncio.to_thread(_send, message, settings.gmail_address, password)
+    except (smtplib.SMTPException, OSError) as exc:
         raise MailError(f"{type(exc).__name__}: {exc}") from exc
-    if response.is_error:
-        raise MailError(f"Resend answered {response.status_code}: {response.text}")
     log.info("Sent %r to %s in %.2fs", subject, to, time.perf_counter() - started)
