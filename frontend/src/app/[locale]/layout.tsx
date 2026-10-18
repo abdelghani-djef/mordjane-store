@@ -60,6 +60,10 @@ const notoArabic = localFont({
   ],
 });
 
+// In-app browsers (Messenger, Facebook, Instagram, Android app web views) have less memory and
+// GPU than Chrome: mark the page before it paints so the home page's scroll effects stay off.
+const IN_APP_BROWSER = `if (/FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|; wv\\)/.test(navigator.userAgent)) document.documentElement.dataset.inApp = "";`;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -96,6 +100,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       className={`${fredoka.variable} ${figtree.variable} ${baloo.variable} ${notoArabic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script dangerouslySetInnerHTML={{ __html: IN_APP_BROWSER }} />
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

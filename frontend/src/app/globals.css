@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Everywhere but in-app browsers (Messenger, Facebook…; see the root layout). */
+@custom-variant not-in-app (:root:not([data-in-app]) &);
 
 /*
  * Mordjane — hazelnut spreads & pastry products. "Hazelnut cream & red".
@@ -323,7 +325,8 @@
     .shelf {
       view-timeline: --shelf block;
     }
-    .shelf-pack {
+    /* Not in in-app browsers (see the root layout): too heavy for them while scrolling. */
+    :root:not([data-in-app]) .shelf-pack {
       animation: shelf-settle linear both;
       animation-timeline: --shelf;
       animation-range: entry calc(15% + var(--i, 0) * 7%) entry calc(75% + var(--i, 0) * 7%);

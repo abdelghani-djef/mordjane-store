@@ -23,7 +23,9 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+    // In-app browsers get a plain background: blurring the page behind a sticky bar on every
+    // scroll frame makes them stutter.
+    <header className="sticky top-0 z-40 border-b bg-background/95 not-in-app:bg-background/85 not-in-app:backdrop-blur not-in-app:supports-[backdrop-filter]:bg-background/70">
       <a
         href="#main"
         className="sr-only z-50 rounded-md bg-primary px-3 py-2 text-primary-foreground focus:not-sr-only focus:absolute focus:start-2 focus:top-2"

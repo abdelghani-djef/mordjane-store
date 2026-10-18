@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 /**
  * The hero's section element, exposing how far it has been scrolled away as `--hero-p`
  * (0 at the top, 1 once scrolled by its own height). The children style themselves from it
- * (see `.hero-*` in globals.css). Works in every browser; with reduced motion it stays at 0.
+ * (see `.hero-*` in globals.css). Works in every browser; with reduced motion, or in an in-app
+ * browser (see the root layout), it stays at 0 and nothing runs while scrolling.
  */
 export function HeroScroll({
   children,
@@ -18,7 +19,10 @@ export function HeroScroll({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const still =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.hasAttribute("data-in-app");
+    if (!el || still) return;
     let frame = 0;
     const update = () => {
       frame = 0;

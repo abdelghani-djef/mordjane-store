@@ -158,8 +158,9 @@ export function SizeStory({
                   <div
                     className={cn(
                       "transition-opacity duration-500",
-                      // Phones: the text scrolls over the pinned stage, so it gets a backing.
-                      "max-md:rounded-2xl max-md:bg-praline/90 max-md:p-5 max-md:backdrop-blur-sm",
+                      // Phones: the text scrolls over the pinned stage, so it gets a backing
+                      // (solid rather than blurred, which stutters while scrolling).
+                      "max-md:rounded-2xl max-md:bg-praline/95 max-md:p-5",
                       i === active ? "opacity-100" : "opacity-40",
                     )}
                   >
