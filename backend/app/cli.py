@@ -24,9 +24,8 @@ from app.models import (
     ProductVariant,
 )
 from app.security import hash_password
-from app.seed_catalog import BRAND, PRODUCTS, STORAGE, SeedProduct
+from app.seed_catalog import BRAND, PACKS, PRODUCTS, STORAGE, SeedProduct
 from app.seed_delegations import DELEGATIONS
-from app.seed_packs import PACKS
 
 cli = typer.Typer(no_args_is_help=True)
 

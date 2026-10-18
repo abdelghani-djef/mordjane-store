@@ -104,7 +104,7 @@ Product sizes are referenced by product slug and weight.
 
 A pack is a box of several sizes sold together for less than buying them one by one, e.g. 2 × peanut cream 200 g + hazelnut cream 200 g.
 
-`seed` loads the shop's 12 promotional offers (« Offre 1 » to « Offre 12 », from 50 to 104 DT), with offers 1, 8 and 12 on the home page. They live in `backend/app/seed_packs.py`, each with its offer price and its "au lieu de" price from the offers sheet.
+`seed` loads the shop's 12 promotional offers (« Offre 1 » to « Offre 12 », from 50 to 104 DT), with offers 1, 8 and 12 on the home page. They are listed at the end of `backend/app/seed_catalog.py`, each with its offer price and its "au lieu de" price from the offers sheet.
 
 - **Admin → Packs** creates them. Choose the sizes and how many of each go in the box (at least 2 items in total), then type the offer price and the "au lieu de" price shown struck through, which must be higher. The form shows how much customers save, and what the items cost one by one at today's prices for reference. A photo of the box is optional: without one, the shop draws the box open with its items' photos.
 - **In the shop:** packs have their own page (`/packs`) and link in the header. Each pack shows its price, the "au lieu de" price struck through, and the saving. Packs switched to *On home page* appear right under the hero.

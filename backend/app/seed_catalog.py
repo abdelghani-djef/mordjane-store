@@ -3,7 +3,7 @@
 Copy (French, English, Arabic), sizes and shelf lives come from the supplier's site
 (cebon.dz); each size has its photo in seed_media/products/<slug>/<grams>.webp and the
 product's listing photo is seed_media/products/<slug>.webp. Prices and stock are starting
-values: review them in the admin panel.
+values: review them in the admin panel. PACKS at the end are the shop's promotional offers.
 """
 
 from dataclasses import dataclass
@@ -813,4 +813,49 @@ PRODUCTS: tuple[SeedProduct, ...] = (
         shelf_life_months=12,
         sizes=(Size(250, "4.900", 40),),
     ),
+)
+
+
+# --- promotional offers ("Offres promotionnelles") -----------------------------------------
+
+
+@dataclass(frozen=True)
+class SeedPack:
+    """A box of jars (one of each) at its offer price, shown next to its "au lieu de" price."""
+
+    number: int
+    price: str  # TND
+    regular_price: str  # "au lieu de", TND
+    items: tuple[tuple[str, int], ...]  # (product slug, grams)
+    featured: bool = False  # on the home page
+
+    @property
+    def slug(self) -> str:
+        return f"offre-{self.number}"
+
+    @property
+    def name(self) -> Text:
+        return Text(en=f"Offer {self.number}", fr=f"Offre {self.number}", ar=f"العرض {self.number}")
+
+
+H350 = ("creme-noisettes", 350)  # Crème de noisette 350 gr
+C350 = ("pate-a-tartiner", 350)  # Crème de noisette caco 350 gr
+RH200 = ("creme-noisettes-rocher", 200)  # Crème de noisette rocher 200 gr
+RC200 = ("pate-a-tartiner-rocher", 200)  # Crème de noisette rocher caco
+RH600 = ("creme-noisettes-rocher", 600)  # Rocher 600 gr
+RC600 = ("pate-a-tartiner-rocher", 600)  # Rocher 600 gr (2)
+
+PACKS: tuple[SeedPack, ...] = (
+    SeedPack(1, "75.000", "90.000", (H350, C350, RH200, RC200), featured=True),
+    SeedPack(2, "94.000", "112.000", (H350, C350, RH200, RH600)),
+    SeedPack(3, "87.000", "103.000", (H350, C350, RH200, RC600)),
+    SeedPack(4, "92.000", "110.000", (H350, C350, RC200, RH600)),
+    SeedPack(5, "104.000", "123.000", (H350, C350, RH600, RC600)),
+    SeedPack(6, "84.000", "100.000", (H350, RH200, RC200, RC600)),
+    SeedPack(7, "97.000", "117.000", (RH200, RC200, RH600, RC600)),
+    SeedPack(8, "57.000", "68.000", (H350, C350, RC200), featured=True),
+    SeedPack(9, "56.000", "67.000", (H350, RH200, RC200)),
+    SeedPack(10, "53.000", "65.000", (C350, RH200, RC200)),
+    SeedPack(11, "51.000", "62.000", (RC200, RH600)),
+    SeedPack(12, "50.000", "58.000", (H350, RC600), featured=True),
 )
