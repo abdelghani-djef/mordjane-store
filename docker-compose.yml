@@ -1,4 +1,4 @@
-# The shop in three containers: mordjane-db, mordjane-api, mordjane-front (see README).
+# The shop's containers: mordjane-db, -api, -front, -mail and -backup (see README).
 # Copy .env.example to .env and fill it in before `docker compose up -d --build`.
 name: mordjane
 
@@ -40,6 +40,13 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       MEDIA_DIR: /data/media
       PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3000}
+      # Send through mordjane-mail unless .env points SMTP_* at another server.
+      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+      MAIL_FROM: ${MAIL_FROM:-Mordjane <noreply@${MAIL_DOMAIN}>}
+      SMTP_HOST: ${SMTP_HOST:-mordjane-mail}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_SSL: ${SMTP_SSL:-false}
     volumes:
       - mordjane-media:/data/media
 
@@ -56,6 +63,25 @@ services:
         condition: service_healthy
     ports:
       - "${FRONT_PORT:-3000}:3000"
+
+  # Outgoing mail server (Postfix): delivers the shop's emails and signs them with DKIM.
+  # Only the other containers can use it. Needs DNS records; see README → Mail server.
+  mordjane-mail:
+    image: boky/postfix:5.1.0-alpine
+    container_name: mordjane-mail
+    restart: unless-stopped
+    environment:
+      ALLOWED_SENDER_DOMAINS: ${MAIL_DOMAIN:?set MAIL_DOMAIN in .env}
+      POSTFIX_myhostname: ${MAIL_HOSTNAME:-mail.${MAIL_DOMAIN}}
+      DKIM_AUTOGENERATE: "true"
+      DKIM_SELECTOR: mail
+      # Optional: hand mail to a provider instead of delivering it directly.
+      RELAYHOST: ${RELAYHOST:-}
+      RELAYHOST_USERNAME: ${RELAYHOST_USERNAME:-}
+      RELAYHOST_PASSWORD: ${RELAYHOST_PASSWORD:-}
+    volumes:
+      - mordjane-mail-dkim:/etc/opendkim/keys
+      - mordjane-mail-queue:/var/spool/postfix
 
   # Every day at midnight (Tunis time): pg_dump into ~/mordjane_db_backups, keep 14 days.
   mordjane-backup:
@@ -85,3 +111,5 @@ services:
 volumes:
   mordjane-db-data:
   mordjane-media:
+  mordjane-mail-dkim:
+  mordjane-mail-queue:

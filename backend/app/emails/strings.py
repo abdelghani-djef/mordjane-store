@@ -25,8 +25,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "Please have {total} ready for the courier.",
         "status_intro_delivered": "Your order has been delivered. Enjoy, and thank you for "
         "choosing Mordjane!",
-        "status_intro_cancelled": "Your order has been cancelled. If this is unexpected, "
-        "reply to this email or call us.",
+        "status_intro_cancelled": "Your order has been cancelled. If you didn't expect this, "
+        "you can place a new order on our website.",
         # order summary
         "order_heading": "Your order",
         "product": "Product",
@@ -39,7 +39,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "cod": "Cash on delivery",
         "deliver_to": "Delivery address",
         "placed_on": "Placed on {date}",
-        "footer": "You're receiving this email because you ordered from Mordjane.",
+        "footer": "You're receiving this email because you ordered from Mordjane. "
+        "This is an automatic message; please don't reply.",
         # admin
         "admin_new_subject": "New order {code}: {total}, {city}",
         "admin_new_intro": "A new order was placed and is waiting for validation.",
@@ -83,7 +84,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "status_intro_delivered": "Votre commande a été livrée. Bonne dégustation et merci "
         "d'avoir choisi Mordjane !",
         "status_intro_cancelled": "Votre commande a été annulée. Si c'est inattendu, "
-        "répondez à cet e-mail ou appelez-nous.",
+        "vous pouvez passer une nouvelle commande sur notre site.",
         "order_heading": "Votre commande",
         "product": "Produit",
         "qty": "Qté",
@@ -95,7 +96,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "cod": "À la livraison, en espèces",
         "deliver_to": "Adresse de livraison",
         "placed_on": "Passée le {date}",
-        "footer": "Vous recevez cet e-mail car vous avez commandé chez Mordjane.",
+        "footer": "Vous recevez cet e-mail car vous avez commandé chez Mordjane. "
+        "Ce message est automatique, merci de ne pas y répondre.",
         "admin_new_subject": "Nouvelle commande {code} : {total}, {city}",
         "admin_new_intro": "Une nouvelle commande attend votre validation.",
         "admin_status_subject": "Commande {code} : {from_status} → {to_status}",
@@ -142,8 +144,8 @@ STRINGS["ar"] = {
     "status_intro_shipped": "غادر طلبك مخزننا وهو في الطريق إليك. يُرجى تجهيز مبلغ "
     "\u2066{total}\u2069 للموزّع.",
     "status_intro_delivered": "تم تسليم طلبك. بالهناء والشفاء، وشكرًا لاختيارك Mordjane!",
-    "status_intro_cancelled": "تم إلغاء طلبك. إن لم يكن ذلك متوقعًا، رُدّ على هذه الرسالة "
-    "أو اتصل بنا.",
+    "status_intro_cancelled": "تم إلغاء طلبك. إن لم يكن ذلك متوقعًا، يمكنك تقديم طلب جديد "
+    "على موقعنا.",
     "order_heading": "طلبك",
     "product": "المنتج",
     "qty": "الكمية",
@@ -155,7 +157,7 @@ STRINGS["ar"] = {
     "cod": "نقدًا عند الاستلام",
     "deliver_to": "عنوان التوصيل",
     "placed_on": "بتاريخ {date}",
-    "footer": "تصلك هذه الرسالة لأنك طلبت من متجر Mordjane.",
+    "footer": "تصلك هذه الرسالة لأنك طلبت من متجر Mordjane. هذه رسالة آلية، يُرجى عدم الرد عليها.",
     "status_pending": "في الانتظار",
     "status_validated": "مؤكَّد",
     "status_shipped": "تم الشحن",

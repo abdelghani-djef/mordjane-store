@@ -19,17 +19,18 @@ Built for Tunisia: prices are in **Tunisian dinars** (3 decimals, e.g. `12,500 D
 
 ## Quick start
 
-The shop runs as four containers:
+The shop runs as five containers:
 
 | Container        | Image                 | Port                                    |
 | ---------------- | --------------------- | --------------------------------------- |
 | `mordjane-db`    | `postgres:17`         | `127.0.0.1:5434` (this machine only)    |
 | `mordjane-api`   | `backend/Dockerfile`  | internal only; runs migrations on start |
 | `mordjane-front` | `frontend/Dockerfile` | `3000` (`FRONT_PORT`)                   |
+| `mordjane-mail`  | `boky/postfix`        | internal only; sends the shop's emails (see [Mail server](#mail-server)) |
 | `mordjane-backup`| `postgres:17`         | none; daily database dump (see [Backups](#backups)) |
 
 ```sh
-cp .env.example .env            # set POSTGRES_PASSWORD, JWT_SECRET, SMTP_*, PUBLIC_SITE_URL
+cp .env.example .env            # set POSTGRES_PASSWORD, JWT_SECRET, MAIL_DOMAIN, PUBLIC_SITE_URL
 mkdir -m 700 ~/mordjane_db_backups   # where the daily backups go (only you can open it)
 docker compose up -d --build    # builds the images, migrates the database, starts the shop
 ```
@@ -120,20 +121,34 @@ The shop emails customers and staff. Customers give their email at checkout, and
 - **Staff notes** on status changes are never shown to customers.
 - **Sending never slows down or breaks checkout.** Emails go out in the background right after the order is saved. If the mail server is down, the failure is logged and the order still goes through.
 
-### SMTP settings
+### Mail server
 
-Set these in `.env` for your mail provider (Brevo, Mailgun, Amazon SES, Gmail/Google Workspace, your host's SMTP…):
+`mordjane-mail` is a Postfix server that delivers the shop's emails itself and signs them with DKIM. Only the other containers can use it; it has no port on the host and accepts no incoming mail. In `.env`:
 
 | Variable | Example | Notes |
 | --- | --- | --- |
-| `SMTP_HOST` | `smtp-relay.brevo.com` | |
-| `SMTP_PORT` | `587` | 587 with STARTTLS, or 465 with SSL |
-| `SMTP_STARTTLS` / `SMTP_SSL` | `true` / `false` | match the port |
-| `SMTP_USERNAME` / `SMTP_PASSWORD` | provider credentials | |
-| `MAIL_FROM` | `Mordjane <commandes@mordjane.tn>` | use a domain your provider has verified (SPF/DKIM), or mail lands in spam |
+| `MAIL_DOMAIN` | `mordjane.tn` | **required**; the server only sends as `…@MAIL_DOMAIN` |
+| `MAIL_FROM` | `Mordjane <noreply@mordjane.tn>` | defaults to `noreply@MAIL_DOMAIN`; the shop only sends, nobody reads replies |
+| `MAIL_HOSTNAME` | `mail.mordjane.tn` | defaults to `mail.MAIL_DOMAIN`; must match the reverse DNS below |
 | `PUBLIC_SITE_URL` | `https://mordjane.tn` | base for the tracking and admin links in emails |
-| `SMTP_HELO_HOSTNAME` | optional | defaults to the `MAIL_FROM` domain |
 | `MAIL_ENABLED` | `true` | `false` logs emails instead of sending them |
+
+**DNS records.** Without these, Gmail, Outlook and others put the shop's mail in spam or refuse it. Replace `mordjane.tn` and `203.0.113.10` with your domain and your server's IP:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| `A` | `mail.mordjane.tn` | `203.0.113.10` |
+| `TXT` | `mordjane.tn` | `v=spf1 a:mail.mordjane.tn -all` |
+| `TXT` | `mail._domainkey.mordjane.tn` | the DKIM key: `docker compose exec mordjane-mail cat /etc/opendkim/keys/mordjane.tn.txt` |
+| `TXT` | `_dmarc.mordjane.tn` | `v=DMARC1; p=quarantine; rua=mailto:you@mordjane.tn` |
+| `PTR` (reverse DNS) | `203.0.113.10` | `mail.mordjane.tn`, set in your hosting provider's panel, not at your DNS registrar |
+
+- **The DKIM key** is generated on first start and kept in the `mordjane-mail-dkim` volume. Publish it once. If you delete that volume, a new key is generated and you must update the DNS record.
+- **Outgoing port 25 must be open.** Many hosts (AWS, Google Cloud, Azure, DigitalOcean, Hetzner for new accounts…) block it by default; ask their support to open it. If they won't, set `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD` in `.env` to hand the mail to a provider (Brevo, Mailgun, Amazon SES…), which then needs its own SPF and DKIM records.
+- **Check it:** send yourself a message from **Admin → Notifications → Send test email**, open it in Gmail and choose *Show original*: SPF, DKIM and DMARC should all say `PASS`. `docker compose logs mordjane-mail` shows each delivery (`status=sent`) or why it failed.
+- **Undelivered mail** waits in the `mordjane-mail-queue` volume and Postfix keeps retrying, so a restart loses nothing.
+
+To skip `mordjane-mail` and send through a provider directly instead, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_STARTTLS` / `SMTP_SSL` and `SMTP_USERNAME` / `SMTP_PASSWORD` in `.env`; they override the defaults that point at `mordjane-mail`.
 
 ## How it fits together
 
@@ -245,6 +260,7 @@ The dumps are owned by root, but you can read, copy and delete them because the 
 
 - Set `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`, and serve everything over HTTPS (keep `COOKIE_SECURE=true`).
 - Load data with `seed` and `create-admin`, never `seed-demo`.
+- Add the mail DNS records and reverse DNS, and check that test emails pass SPF, DKIM and DMARC (see [Mail server](#mail-server)).
 - Add rate limiting on `POST /api/admin/auth/login` and `POST /api/orders`, at the reverse proxy or with middleware.
 - Copy `~/mordjane_db_backups` off the server regularly (see [Backups](#backups)), and back up the `mordjane-media` volume (product photos) too.
 - Review product prices and stock under **Admin → Products**. The supplier doesn't publish prices, so sizes added from the CEBON range have estimated prices and placeholder stock.

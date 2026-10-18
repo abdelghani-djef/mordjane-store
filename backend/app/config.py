@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # Name announced in the SMTP greeting (EHLO). Default: the MAIL_FROM domain. Setting it
     # avoids a reverse-DNS lookup of this machine on every send, which can stall for seconds.
     smtp_helo_hostname: str | None = None
-    mail_from: str = "Mordjane <orders@mordjane.local>"
+    mail_from: str = "Mordjane <noreply@mordjane.local>"
     # Base URL of the storefront, for links in emails (tracking page, admin order page).
     public_site_url: str = "http://localhost:3000"
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
