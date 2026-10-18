@@ -132,14 +132,9 @@ The shop emails customers and staff. Customers give their email at checkout, and
 
 ### Sending email
 
-The shop sends through [Resend](https://resend.com)'s HTTP API, in development too. The API key goes in `.env` as `RESEND_API_KEY` (the repository root's `.env` for Docker, `backend/.env` for local development); it must never be committed, and GitHub refuses pushes that contain it. The rest is fixed in `backend/app/mail.py`:
+The shop sends through [Resend](https://resend.com)'s HTTP API, in development too. Customer emails go to the address the customer typed at checkout; staff emails go to the recipients set under **Admin → Notifications**. The sender is `onboarding@resend.dev` (`RESEND_FROM` in `backend/app/mail.py`). The API key goes in `.env` as `RESEND_API_KEY` (the repository root's `.env` for Docker, `backend/.env` for local development); never commit it, GitHub refuses pushes that contain it.
 
-| Constant | Value |
-| --- | --- |
-| `RESEND_FROM` | `onboarding@resend.dev` |
-| `RESEND_TO` | `abdelghanismartdrilling@gmail.com` |
-
-- **Every email goes to `RESEND_TO`,** whoever it was meant for (customer or staff). Resend's shared `onboarding@resend.dev` sender can only deliver to the Resend account's own address. To email customers, verify a domain in Resend (*Domains*), set `RESEND_FROM` to an address on it, and send to the real recipients instead of `RESEND_TO`.
+- **Resend's `onboarding@resend.dev` sender only delivers to your own Resend account's address;** Resend refuses other recipients until a domain is verified in Resend (*Domains*).
 - **Limit:** the free plan sends 3,000 emails a month, at most 100 a day, development included. Set `MAIL_ENABLED=false` to log emails instead of sending them.
 - **Check it:** **Admin → Notifications → Send test email**. `docker compose logs mordjane-api | grep mordjane.mail` shows each send or Resend's error; Resend's *Emails* page shows what happened after that.
 

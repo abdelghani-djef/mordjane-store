@@ -197,14 +197,14 @@ def test_money_and_weight_formatting():
     assert weight(200, "ar") == "200 غ" and weight(None, "en") == ""
 
 
-def test_resend_payload_uses_fixed_sender_and_recipient():
+def test_resend_payload_goes_to_the_given_recipients():
     from app import mail
 
-    payload = mail.build_payload("Order received", "<p>hi</p>", "hi")
+    payload = mail.build_payload(["boss@shop.tn", "stock@shop.tn"], "Low stock", "<p>hi</p>", "hi")
     assert payload == {
         "from": "onboarding@resend.dev",
-        "to": "abdelghanismartdrilling@gmail.com",
-        "subject": "Order received",
+        "to": ["boss@shop.tn", "stock@shop.tn"],
+        "subject": "Low stock",
         "html": "<p>hi</p>",
         "text": "hi",
     }
