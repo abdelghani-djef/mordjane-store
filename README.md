@@ -173,6 +173,27 @@ uv run alembic check          # model ↔ migration drift
 gen-api                       # refresh frontend types if the API changed
 ```
 
+## Docker
+
+`docker-compose.yml` runs the shop as three containers. Local development still uses devenv.
+
+| Container        | Image                     | Port                                  |
+| ---------------- | ------------------------- | ------------------------------------- |
+| `mordjane-db`    | `postgres:17`             | `127.0.0.1:5434` (host only)          |
+| `mordjane-api`   | `backend/Dockerfile`      | internal only; runs migrations on start |
+| `mordjane-front` | `frontend/Dockerfile`     | `3000` (`FRONT_PORT`)                 |
+
+```sh
+cp .env.example .env    # set POSTGRES_PASSWORD, JWT_SECRET, SMTP_*, PUBLIC_SITE_URL
+docker compose up -d --build
+docker compose exec mordjane-api python -m app.cli seed
+docker compose exec mordjane-api python -m app.cli create-admin
+```
+
+- **Data** lives in two named volumes: `mordjane-db-data` (Postgres) and `mordjane-media` (uploaded photos).
+- **`BACKEND_URL`** is a build argument of the frontend image because Next.js fixes the `/api` and `/media` rewrites at build time. Rebuild `mordjane-front` if the API's address changes.
+- **`COOKIE_SECURE`** defaults to `true`, so serve the shop over HTTPS behind a reverse proxy. Browsers also accept secure cookies on `http://localhost`.
+
 ## Before going to production
 
 - Set `JWT_SECRET` and `COOKIE_SECURE=true`, and serve everything over HTTPS.

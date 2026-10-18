@@ -1,0 +1,62 @@
+# Production-style stack. Local development still uses devenv (see README).
+# Copy .env.example to .env and fill it in before `docker compose up -d --build`.
+name: mordjane
+
+services:
+  mordjane-db:
+    image: postgres:17
+    container_name: mordjane-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mordjane}
+      POSTGRES_USER: ${POSTGRES_USER:-mordjane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    # Host access on localhost only (psql, backups); containers use the internal network.
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - mordjane-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mordjane-api:
+    build: ./backend
+    image: mordjane-api
+    container_name: mordjane-api
+    restart: unless-stopped
+    depends_on:
+      mordjane-db:
+        condition: service_healthy
+    # SMTP_* / MAIL_FROM and any other backend settings come straight from .env.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-mordjane}:${POSTGRES_PASSWORD}@mordjane-db:5432/${POSTGRES_DB:-mordjane}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      MEDIA_DIR: /data/media
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3000}
+    volumes:
+      - mordjane-media:/data/media
+
+  mordjane-front:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_URL: http://mordjane-api:8000
+    image: mordjane-front
+    container_name: mordjane-front
+    restart: unless-stopped
+    depends_on:
+      mordjane-api:
+        condition: service_healthy
+    ports:
+      - "${FRONT_PORT:-3000}:3000"
+
+volumes:
+  mordjane-db-data:
+  mordjane-media:

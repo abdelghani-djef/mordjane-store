@@ -19,3 +19,6 @@ backend/media/
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Docker Compose secrets
+.env

@@ -4,6 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle for the Docker image (frontend/Dockerfile).
+  output: "standalone",
   // The dev server only trusts `localhost` by default; allow the loopback IP too so HMR and
   // dev chunks load when browsing http://127.0.0.1:3000 (e2e tests use it).
   allowedDevOrigins: ["127.0.0.1"],
