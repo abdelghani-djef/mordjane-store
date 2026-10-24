@@ -190,6 +190,24 @@
   html {
     @apply font-sans;
   }
+  /* Desktop screens read small at 16px: scale the whole site (it is sized in rem) up with the
+     screen, like browser zoom at 112–137%. Media queries use the browser's own rem, so
+     breakpoints don't move. */
+  @media (width >= 64rem) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+  @media (width >= 96rem) {
+    html {
+      font-size: 125%;
+    }
+  }
+  @media (width >= 120rem) {
+    html {
+      font-size: 137.5%;
+    }
+  }
   /* Display type: Fredoka's rounded forms, medium-heavy, a touch tight. */
   h1,
   h2,

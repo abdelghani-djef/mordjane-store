@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
     <main className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <Link href="/" className="self-start">
-          <Logo tagline={t("title")} />
+          <Logo />
         </Link>
         <div className="flex flex-1 items-center justify-center">
           <form onSubmit={onSubmit} className="w-full max-w-sm">

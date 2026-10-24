@@ -35,7 +35,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <MobileNav links={[...links, { href: "/track", label: t("Nav.track") }]} />
         <Link href="/" className="shrink-0 rounded-md" aria-label="Mordjane">
-          <Logo tagline={t("Brand.tagline")} />
+          <Logo />
         </Link>
         <nav aria-label={t("Nav.shop")} className="ms-6 hidden items-center gap-1 lg:flex">
           {links.map((link, i) => (

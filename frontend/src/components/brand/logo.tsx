@@ -25,31 +25,23 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, tagline }: { className?: string; tagline?: string }) {
+export function Logo({ className }: { className?: string }) {
   const url = useContext(LogoUrl);
   if (url) {
     return (
-      <span className={cn("inline-flex items-center gap-2", className)}>
-        {/* eslint-disable-next-line @next/next/no-img-element -- any size or shape the admin uploads */}
-        <img src={url} alt="Mordjane" className="h-10 w-auto max-w-40 object-contain" />
-        {tagline && (
-          <span className="hidden max-w-[12ch] text-xs leading-tight text-muted-foreground sm:block">
-            {tagline}
-          </span>
-        )}
-      </span>
+      // eslint-disable-next-line @next/next/no-img-element -- any size or shape the admin uploads
+      <img
+        src={url}
+        alt="Mordjane"
+        className={cn("h-10 w-auto max-w-40 object-contain", className)}
+      />
     );
   }
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <LogoMark />
-      <span className="flex flex-col leading-none">
-        <span className="font-heading text-[1.45rem] font-semibold tracking-[-0.01em]">
-          Mordjane
-        </span>
-        {tagline && (
-          <span className="mt-0.5 hidden text-xs text-muted-foreground sm:block">{tagline}</span>
-        )}
+      <span className="font-heading text-[1.45rem] leading-none font-semibold tracking-[-0.01em]">
+        Mordjane
       </span>
     </span>
   );
