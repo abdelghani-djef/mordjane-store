@@ -40,7 +40,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
             { href: "/contact", label: t("Nav.contact") },
           ]}
         />
-        <Link href="/" className="shrink-0 rounded-md" aria-label="Mordjane">
+        <Link href="/" className="shrink-0 rounded-md" aria-label="El Mordjane">
           <Logo />
         </Link>
         <nav aria-label={t("Nav.shop")} className="ms-6 hidden items-center gap-1 lg:flex">

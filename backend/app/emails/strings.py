@@ -24,7 +24,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "status_intro_shipped": "Your order has left our warehouse and is on its way to you. "
         "Please have {total} ready for the courier.",
         "status_intro_delivered": "Your order has been delivered. Enjoy, and thank you for "
-        "choosing Mordjane!",
+        "choosing El Mordjane!",
         "status_intro_cancelled": "Your order has been cancelled. If you didn't expect this, "
         "you can place a new order on our website.",
         # order summary
@@ -40,7 +40,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "cod": "Cash on delivery",
         "deliver_to": "Delivery address",
         "placed_on": "Placed on {date}",
-        "footer": "You're receiving this email because you ordered from Mordjane. "
+        "footer": "You're receiving this email because you ordered from El Mordjane. "
         "This is an automatic message; please don't reply.",
         # admin
         "admin_new_subject": "New order {code}: {total}, {city}",
@@ -55,9 +55,9 @@ STRINGS: dict[str, dict[str, str]] = {
         "left). Restock or switch them off.",
         "stock_left": "Left",
         "open_products": "Manage products",
-        "admin_footer": "Staff notification from your Mordjane shop. Change who receives "
+        "admin_footer": "Staff notification from your El Mordjane shop. Change who receives "
         "these emails under Admin → Notifications.",
-        "test_subject": "Test email from Mordjane",
+        "test_subject": "Test email from El Mordjane",
         "test_intro": "Your email settings work: this message reached you from the shop.",
         "status_pending": "Pending",
         "status_validated": "Validated",
@@ -83,7 +83,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "status_intro_shipped": "Votre commande a quitté notre entrepôt et arrive chez vous. "
         "Merci de préparer {total} pour le livreur.",
         "status_intro_delivered": "Votre commande a été livrée. Bonne dégustation et merci "
-        "d'avoir choisi Mordjane !",
+        "d'avoir choisi El Mordjane !",
         "status_intro_cancelled": "Votre commande a été annulée. Si c'est inattendu, "
         "vous pouvez passer une nouvelle commande sur notre site.",
         "order_heading": "Votre commande",
@@ -98,7 +98,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "cod": "À la livraison, en espèces",
         "deliver_to": "Adresse de livraison",
         "placed_on": "Passée le {date}",
-        "footer": "Vous recevez cet e-mail car vous avez commandé chez Mordjane. "
+        "footer": "Vous recevez cet e-mail car vous avez commandé chez El Mordjane. "
         "Ce message est automatique, merci de ne pas y répondre.",
         "admin_new_subject": "Nouvelle commande {code} : {total}, {city}",
         "admin_new_intro": "Une nouvelle commande attend votre validation.",
@@ -113,9 +113,9 @@ STRINGS: dict[str, dict[str, str]] = {
         "({threshold} ou moins). Réapprovisionnez-les ou désactivez-les.",
         "stock_left": "Reste",
         "open_products": "Gérer les produits",
-        "admin_footer": "Notification équipe de votre boutique Mordjane. Choisissez qui "
+        "admin_footer": "Notification équipe de votre boutique El Mordjane. Choisissez qui "
         "reçoit ces e-mails dans Admin → Notifications.",
-        "test_subject": "E-mail de test Mordjane",
+        "test_subject": "E-mail de test El Mordjane",
         "test_intro": "Vos réglages e-mail fonctionnent : ce message vous a été envoyé par "
         "la boutique.",
         "status_pending": "En attente",
@@ -145,7 +145,7 @@ STRINGS["ar"] = {
     "status_intro_validated": "تم تأكيد طلبك ونحن بصدد تجهيزه.",
     "status_intro_shipped": "غادر طلبك مخزننا وهو في الطريق إليك. يُرجى تجهيز مبلغ "
     "\u2066{total}\u2069 للموزّع.",
-    "status_intro_delivered": "تم تسليم طلبك. بالهناء والشفاء، وشكرًا لاختيارك Mordjane!",
+    "status_intro_delivered": "تم تسليم طلبك. بالهناء والشفاء، وشكرًا لاختيارك El Mordjane!",
     "status_intro_cancelled": "تم إلغاء طلبك. إن لم يكن ذلك متوقعًا، يمكنك تقديم طلب جديد "
     "على موقعنا.",
     "order_heading": "طلبك",
@@ -160,7 +160,8 @@ STRINGS["ar"] = {
     "cod": "نقدًا عند الاستلام",
     "deliver_to": "عنوان التوصيل",
     "placed_on": "بتاريخ {date}",
-    "footer": "تصلك هذه الرسالة لأنك طلبت من متجر Mordjane. هذه رسالة آلية، يُرجى عدم الرد عليها.",
+    "footer": "تصلك هذه الرسالة لأنك طلبت من متجر El Mordjane. "
+    "هذه رسالة آلية، يُرجى عدم الرد عليها.",
     "status_pending": "في الانتظار",
     "status_validated": "مؤكَّد",
     "status_shipped": "تم الشحن",

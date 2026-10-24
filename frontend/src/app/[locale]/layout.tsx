@@ -77,9 +77,13 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     locale: hasLocale(routing.locales, locale) ? locale : "en",
     namespace: "Meta",
   });
+  // The tab icon follows the logo uploaded under Appearance; until then, the hazelnut mark.
+  const appearance = await serverApi<Appearance>("/appearance").catch(() => null);
+  const icon = appearance?.logo_image_url ?? "/icon.svg";
   return {
-    title: { default: t("title"), template: `%s · Mordjane` },
+    title: { default: t("title"), template: `%s · El Mordjane` },
     description: t("description"),
+    icons: { icon, apple: icon },
   };
 }
 

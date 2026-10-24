@@ -1,10 +1,10 @@
 {
   "Meta": {
-    "title": "Mordjane — Crèmes à tartiner et pâtisserie",
+    "title": "El Mordjane — Crèmes à tartiner et pâtisserie",
     "description": "Crèmes de noisettes et de cacahuètes, crèmes rocher croquantes, pâtes à glacer et ingrédients de pâtisserie. Paiement à la livraison partout en Tunisie."
   },
   "Brand": {
-    "name": "Mordjane"
+    "name": "El Mordjane"
   },
   "Nav": {
     "shop": "Boutique",
@@ -240,7 +240,7 @@
     "about": "Crèmes à tartiner, pâtes à glacer et ingrédients de pâtisserie El Mordjene, livrés partout en Tunisie.",
     "shop": "Boutique",
     "help": "Aide",
-    "rights": "© {year} Mordjane. Tous droits réservés.",
+    "rights": "© {year} El Mordjane. Tous droits réservés.",
     "admin": "Espace équipe",
     "contact": "Nous contacter",
     "followUs": "Suivez-nous",
@@ -252,7 +252,7 @@
     "back": "Retour à la boutique"
   },
   "Admin": {
-    "title": "Administration Mordjane",
+    "title": "Administration El Mordjane",
     "backToStore": "Voir la boutique",
     "logout": "Se déconnecter",
     "nav": {
@@ -631,7 +631,7 @@
         "hint": "Affiché dans l'en-tête, le pied de page et le menu de la boutique, ainsi que dans ce panneau. Un PNG ou WebP à fond transparent convient le mieux ; JPEG, PNG ou WebP, 5 Mo maximum.",
         "light": "Thème clair",
         "dark": "Thème sombre",
-        "lightDefault": "Par défaut : la noisette et le nom Mordjane.",
+        "lightDefault": "Par défaut : la noisette et le nom El Mordjane.",
         "darkSameAsLight": "Pas de version sombre : le logo clair est aussi utilisé en thème sombre.",
         "darkNeedsLight": "Importez d'abord un logo clair ; la version sombre est facultative.",
         "size": "Taille",
@@ -639,7 +639,7 @@
         "saveSize": "Enregistrer la taille",
         "sizeSaved": "Taille du logo enregistrée.",
         "uploaded": "Logo mis à jour.",
-        "resetBody": "Le logo importé sera supprimé et la boutique affichera de nouveau la noisette et le nom Mordjane (y compris en thème sombre)."
+        "resetBody": "Le logo importé sera supprimé et la boutique affichera de nouveau la noisette et le nom El Mordjane (y compris en thème sombre)."
       },
       "hero": {
         "title": "Photo de la page d'accueil",

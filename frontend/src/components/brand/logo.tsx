@@ -65,7 +65,7 @@ export function LogoView({
       // eslint-disable-next-line @next/next/no-img-element -- any size or shape the admin uploads
       <img
         src={src}
-        alt="Mordjane"
+        alt="El Mordjane"
         style={size}
         className={cn(
           "h-[min(var(--logo-h),3rem)] w-auto max-w-[min(calc(var(--logo-h)*5),55vw)] shrink-0 object-contain sm:h-(--logo-h)",
@@ -87,13 +87,14 @@ export function LogoView({
     <span
       style={size}
       className={cn(
-        "inline-flex items-center gap-2 [--h:min(var(--logo-h),3rem)] sm:[--h:var(--logo-h)]",
+        // Phones get a smaller name so "El Mordjane" leaves room for the menu and cart.
+        "inline-flex items-center gap-2 [--h:min(var(--logo-h),2.25rem)] sm:[--h:var(--logo-h)]",
         className,
       )}
     >
       <LogoMark className="size-(--h)" />
-      <span className="font-heading text-[calc(var(--h)*0.72)] leading-none font-semibold tracking-[-0.01em]">
-        Mordjane
+      <span className="font-heading text-[calc(var(--h)*0.6)] leading-none font-semibold tracking-[-0.01em] whitespace-nowrap sm:text-[calc(var(--h)*0.72)]">
+        El Mordjane
       </span>
     </span>
   );

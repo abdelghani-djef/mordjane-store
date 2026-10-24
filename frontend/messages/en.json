@@ -1,10 +1,10 @@
 {
   "Meta": {
-    "title": "Mordjane — Hazelnut spreads & pastry creams",
+    "title": "El Mordjane — Hazelnut spreads & pastry creams",
     "description": "Hazelnut and peanut creams, crunchy rocher spreads, glazing pastes and baking essentials. Cash on delivery across Tunisia."
   },
   "Brand": {
-    "name": "Mordjane"
+    "name": "El Mordjane"
   },
   "Nav": {
     "shop": "Shop",
@@ -240,7 +240,7 @@
     "about": "El Mordjene spreads, glazing pastes and baking essentials, delivered across Tunisia.",
     "shop": "Shop",
     "help": "Help",
-    "rights": "© {year} Mordjane. All rights reserved.",
+    "rights": "© {year} El Mordjane. All rights reserved.",
     "admin": "Staff",
     "contact": "Contact us",
     "followUs": "Follow us",
@@ -252,7 +252,7 @@
     "back": "Back to the shop"
   },
   "Admin": {
-    "title": "Mordjane Admin",
+    "title": "El Mordjane Admin",
     "backToStore": "View store",
     "logout": "Log out",
     "nav": {
@@ -631,7 +631,7 @@
         "hint": "Shown in the shop's header, footer and menu, and in this admin panel. A PNG or WebP with a transparent background works best; JPEG, PNG or WebP, up to 5 MB.",
         "light": "Light theme",
         "dark": "Dark theme",
-        "lightDefault": "Default: the hazelnut mark and the Mordjane name.",
+        "lightDefault": "Default: the hazelnut mark and the El Mordjane name.",
         "darkSameAsLight": "No dark version: the light logo is used in the dark theme too.",
         "darkNeedsLight": "Upload a light logo first; the dark version is optional.",
         "size": "Size",
@@ -639,7 +639,7 @@
         "saveSize": "Save size",
         "sizeSaved": "Logo size saved.",
         "uploaded": "Logo updated.",
-        "resetBody": "Your uploaded logo will be deleted and the shop will show the hazelnut mark and the Mordjane name again (the dark version too)."
+        "resetBody": "Your uploaded logo will be deleted and the shop will show the hazelnut mark and the El Mordjane name again (the dark version too)."
       },
       "hero": {
         "title": "Home page photo",
