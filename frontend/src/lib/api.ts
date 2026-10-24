@@ -39,6 +39,7 @@ export type NotificationSettings = Schemas["NotificationSettingsOut"];
 export type NotificationSettingsIn = Schemas["NotificationSettingsIn"];
 export type TestEmailResult = Schemas["TestEmailOut"];
 export type Appearance = Schemas["AppearanceOut"];
+export type AppearanceIn = Schemas["AppearanceIn"];
 export type DeliveryCity = Schemas["DeliveryCityOut"];
 export type DeliveryCityAdmin = Schemas["DeliveryCityAdminOut"];
 export type DeliveryCityIn = Schemas["DeliveryCityIn"];

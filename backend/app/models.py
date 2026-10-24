@@ -418,13 +418,20 @@ class AppearanceSettings(TimestampMixin, Base):
     """How the storefront looks. A single row (id = 1), edited from the admin panel."""
 
     __tablename__ = "appearance_settings"
-    __table_args__ = (CheckConstraint("id = 1", name="single_row"),)
+    __table_args__ = (
+        CheckConstraint("id = 1", name="single_row"),
+        CheckConstraint("logo_height BETWEEN 24 AND 96", name="logo_height_range"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, default=1)
     # The home page photo under MEDIA_DIR; None shows the one shipped with the frontend.
     hero_image_path: Mapped[str | None] = mapped_column(String(255))
     # The shop's logo under MEDIA_DIR; None shows the built-in hazelnut mark and name.
     logo_image_path: Mapped[str | None] = mapped_column(String(255))
+    # For the dark theme; None uses the light logo there too.
+    logo_dark_image_path: Mapped[str | None] = mapped_column(String(255))
+    # How tall the logo shows in the header, in CSS px at the base text size.
+    logo_height: Mapped[int] = mapped_column(Integer, default=40, server_default="40")
 
 
 class AdminUser(TimestampMixin, Base):

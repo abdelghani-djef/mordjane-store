@@ -81,7 +81,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon">
         <SidebarHeader className="px-3 py-4">
           <Link href="/admin" className="overflow-hidden text-sidebar-foreground">
-            <Logo />
+            {/* The sidebar is narrower than the shop header: keep a wide logo inside it. */}
+            <Logo className="max-w-56" />
           </Link>
         </SidebarHeader>
         <SidebarContent>

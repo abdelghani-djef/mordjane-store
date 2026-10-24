@@ -506,7 +506,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update Appearance */
+        patch: operations["update_appearance_api_admin_appearance_patch"];
         trace?: never;
     };
     "/api/admin/appearance/{slot}-image": {
@@ -693,12 +694,27 @@ export interface components {
             /** Low Stock Threshold */
             low_stock_threshold: number;
         };
+        /** AppearanceIn */
+        AppearanceIn: {
+            /**
+             * Logo Height
+             * @default 40
+             */
+            logo_height: number;
+        };
         /** AppearanceOut */
         AppearanceOut: {
+            /**
+             * Logo Height
+             * @default 40
+             */
+            logo_height: number;
             /** Hero Image Url */
             readonly hero_image_url: string | null;
             /** Logo Image Url */
             readonly logo_image_url: string | null;
+            /** Logo Dark Image Url */
+            readonly logo_dark_image_url: string | null;
         };
         /** Body_upload_appearance_image_api_admin_appearance__slot__image_post */
         Body_upload_appearance_image_api_admin_appearance__slot__image_post: {
@@ -3331,12 +3347,47 @@ export interface operations {
             };
         };
     };
+    update_appearance_api_admin_appearance_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppearanceIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppearanceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     upload_appearance_image_api_admin_appearance__slot__image_post: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                slot: "hero" | "logo";
+                slot: "hero" | "logo" | "logo-dark";
             };
             cookie?: {
                 mj_admin?: string | null;
@@ -3373,7 +3424,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                slot: "hero" | "logo";
+                slot: "hero" | "logo" | "logo-dark";
             };
             cookie?: {
                 mj_admin?: string | null;

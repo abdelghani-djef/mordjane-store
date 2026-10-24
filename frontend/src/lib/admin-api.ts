@@ -13,6 +13,7 @@ import {
   type AdminStats,
   type AdminUser,
   type Appearance,
+  type AppearanceIn,
   type CategoryAdmin,
   type CategoryIn,
   type CategoryPatch,
@@ -450,7 +451,16 @@ export function useAppearance() {
 }
 
 /** The images an admin can replace under Appearance. */
-export type AppearanceSlot = "hero" | "logo";
+export type AppearanceSlot = "hero" | "logo" | "logo-dark";
+
+export function useSaveAppearance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AppearanceIn) =>
+      api<Appearance>("/admin/appearance", { method: "PATCH", json: body }),
+    onSuccess: (data) => qc.setQueryData(adminKeys.appearance, data),
+  });
+}
 
 export function useUploadAppearanceImage() {
   const qc = useQueryClient();

@@ -615,10 +615,18 @@
       "resetDone": "Image par défaut rétablie.",
       "logo": {
         "title": "Logo",
-        "hint": "Affiché dans l'en-tête, le pied de page et le menu de la boutique, ainsi que dans ce panneau, sur environ 40 px de haut. Un PNG ou WebP à fond transparent convient le mieux ; JPEG, PNG ou WebP, 5 Mo maximum.",
-        "preview": "Logo actuel",
+        "hint": "Affiché dans l'en-tête, le pied de page et le menu de la boutique, ainsi que dans ce panneau. Un PNG ou WebP à fond transparent convient le mieux ; JPEG, PNG ou WebP, 5 Mo maximum.",
+        "light": "Thème clair",
+        "dark": "Thème sombre",
+        "lightDefault": "Par défaut : la noisette et le nom Mordjane.",
+        "darkSameAsLight": "Pas de version sombre : le logo clair est aussi utilisé en thème sombre.",
+        "darkNeedsLight": "Importez d'abord un logo clair ; la version sombre est facultative.",
+        "size": "Taille",
+        "sizeHint": "Hauteur du logo dans l'en-tête. Sur les grands écrans, il grandit avec le reste du site.",
+        "saveSize": "Enregistrer la taille",
+        "sizeSaved": "Taille du logo enregistrée.",
         "uploaded": "Logo mis à jour.",
-        "resetBody": "Le logo importé sera supprimé et la boutique affichera de nouveau la noisette et le nom Mordjane."
+        "resetBody": "Le logo importé sera supprimé et la boutique affichera de nouveau la noisette et le nom Mordjane (y compris en thème sombre)."
       },
       "hero": {
         "title": "Photo de la page d'accueil",
@@ -626,6 +634,10 @@
         "preview": "Photo actuelle de la page d'accueil",
         "uploaded": "Photo de la page d'accueil mise à jour.",
         "resetBody": "La photo importée sera supprimée et la page d'accueil affichera de nouveau la photo par défaut."
+      },
+      "logo-dark": {
+        "uploaded": "Logo du thème sombre mis à jour.",
+        "resetBody": "Le logo du thème sombre sera supprimé et le logo clair sera aussi utilisé en thème sombre."
       }
     }
   }

@@ -4,11 +4,28 @@ import { createContext, useContext } from "react";
 
 import { cn } from "@/lib/utils";
 
-const LogoUrl = createContext<string | null>(null);
+type LogoSettings = { light: string | null; dark: string | null; height: number };
 
-/** The logo an admin uploaded under Appearance; without one, the hazelnut mark and name show. */
-export function LogoProvider({ url, children }: { url: string | null; children: React.ReactNode }) {
-  return <LogoUrl value={url}>{children}</LogoUrl>;
+export const DEFAULT_LOGO_HEIGHT = 40;
+
+const LogoContext = createContext<LogoSettings>({
+  light: null,
+  dark: null,
+  height: DEFAULT_LOGO_HEIGHT,
+});
+
+/**
+ * The logo set under Appearance: an uploaded image (with its own dark-theme version, or the same
+ * one) at the chosen height; without one, the hazelnut mark and name.
+ */
+export function LogoProvider({
+  value,
+  children,
+}: {
+  value: LogoSettings;
+  children: React.ReactNode;
+}) {
+  return <LogoContext value={value}>{children}</LogoContext>;
 }
 
 /** Hazelnut on a red disc: the core ingredient of the range, in the brand red. */
@@ -26,21 +43,56 @@ export function LogoMark({ className }: { className?: string }) {
 }
 
 export function Logo({ className }: { className?: string }) {
-  const url = useContext(LogoUrl);
-  if (url) {
-    return (
+  return <LogoView {...useContext(LogoContext)} className={className} />;
+}
+
+/**
+ * A logo from explicit settings (the admin previews unsaved ones). `theme` pins one version;
+ * otherwise both render and the page's theme shows one. Sizes are in rem so the desktop zoom in
+ * globals.css scales them with the rest of the site; phones cap the height at 3rem to leave
+ * room for the menu and cart.
+ */
+export function LogoView({
+  light,
+  dark,
+  height,
+  theme,
+  className,
+}: LogoSettings & { theme?: "light" | "dark"; className?: string }) {
+  const size = { "--logo-h": `${height / 16}rem` } as React.CSSProperties;
+  if (light) {
+    const img = (src: string, extra?: string) => (
       // eslint-disable-next-line @next/next/no-img-element -- any size or shape the admin uploads
       <img
-        src={url}
+        src={src}
         alt="Mordjane"
-        className={cn("h-10 w-auto max-w-40 object-contain", className)}
+        style={size}
+        className={cn(
+          "h-[min(var(--logo-h),3rem)] w-auto max-w-[min(calc(var(--logo-h)*5),55vw)] shrink-0 object-contain sm:h-(--logo-h)",
+          extra,
+          className,
+        )}
       />
+    );
+    if (!dark || theme === "light") return img(light);
+    if (theme === "dark") return img(dark);
+    return (
+      <>
+        {img(light, "dark:hidden")}
+        {img(dark, "hidden dark:block")}
+      </>
     );
   }
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark />
-      <span className="font-heading text-[1.45rem] leading-none font-semibold tracking-[-0.01em]">
+    <span
+      style={size}
+      className={cn(
+        "inline-flex items-center gap-2 [--h:min(var(--logo-h),3rem)] sm:[--h:var(--logo-h)]",
+        className,
+      )}
+    >
+      <LogoMark className="size-(--h)" />
+      <span className="font-heading text-[calc(var(--h)*0.72)] leading-none font-semibold tracking-[-0.01em]">
         Mordjane
       </span>
     </span>

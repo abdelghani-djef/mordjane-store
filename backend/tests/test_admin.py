@@ -48,6 +48,8 @@ PNG_1PX = bytes.fromhex(
         ("delete", "/api/admin/appearance/hero-image"),
         ("post", "/api/admin/appearance/logo-image"),
         ("delete", "/api/admin/appearance/logo-image"),
+        ("patch", "/api/admin/appearance"),
+        ("post", "/api/admin/appearance/logo-dark-image"),
     ],
 )
 async def test_admin_endpoints_require_auth(client, method, path):
@@ -366,6 +368,8 @@ async def test_logo_upload_and_reset_leaves_hero_alone(client, admin_client):
     assert (await client.get("/api/appearance")).json() == {
         "hero_image_url": None,
         "logo_image_url": None,
+        "logo_dark_image_url": None,
+        "logo_height": 40,
     }
     hero = await admin_client.post(
         "/api/admin/appearance/hero-image", files={"file": ("h.png", PNG_1PX, "image/png")}
@@ -383,6 +387,40 @@ async def test_logo_upload_and_reset_leaves_hero_alone(client, admin_client):
     assert r.json()["hero_image_url"] == hero.json()["hero_image_url"]
 
     assert (await admin_client.delete("/api/admin/appearance/banner-image")).status_code == 422
+
+
+async def test_dark_logo_and_height(client, admin_client):
+    light = await admin_client.post(
+        "/api/admin/appearance/logo-image", files={"file": ("l.png", PNG_1PX, "image/png")}
+    )
+    r = await admin_client.post(
+        "/api/admin/appearance/logo-dark-image", files={"file": ("d.png", PNG_1PX, "image/png")}
+    )
+    assert r.status_code == 200, r.text
+    dark = r.json()["logo_dark_image_url"]
+    assert dark.startswith("/media/appearance/") and dark != light.json()["logo_image_url"]
+    assert r.json()["logo_image_url"] == light.json()["logo_image_url"]
+
+    r = await admin_client.patch("/api/admin/appearance", json={"logo_height": 64})
+    assert r.status_code == 200 and r.json()["logo_height"] == 64
+    assert r.json()["logo_dark_image_url"] == dark
+    assert (await client.get("/api/appearance")).json()["logo_height"] == 64
+    for bad in (10, 200):
+        r = await admin_client.patch("/api/admin/appearance", json={"logo_height": bad})
+        assert r.status_code == 422
+
+    r = await admin_client.delete("/api/admin/appearance/logo-dark-image")
+    assert r.json()["logo_dark_image_url"] is None and not _media_file(dark).exists()
+    assert r.json()["logo_image_url"] == light.json()["logo_image_url"]
+
+    # Resetting the light logo drops the dark one with it.
+    r = await admin_client.post(
+        "/api/admin/appearance/logo-dark-image", files={"file": ("d.png", PNG_1PX, "image/png")}
+    )
+    dark = r.json()["logo_dark_image_url"]
+    r = await admin_client.delete("/api/admin/appearance/logo-image")
+    assert r.json()["logo_image_url"] is None and r.json()["logo_dark_image_url"] is None
+    assert not _media_file(dark).exists()
 
 
 def _media_file(url):

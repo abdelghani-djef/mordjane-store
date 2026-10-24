@@ -615,10 +615,18 @@
       "resetDone": "Default restored.",
       "logo": {
         "title": "Logo",
-        "hint": "Shown in the shop's header, footer and menu, and in this admin panel, at about 40 px high. A PNG or WebP with a transparent background works best; JPEG, PNG or WebP, up to 5 MB.",
-        "preview": "Current logo",
+        "hint": "Shown in the shop's header, footer and menu, and in this admin panel. A PNG or WebP with a transparent background works best; JPEG, PNG or WebP, up to 5 MB.",
+        "light": "Light theme",
+        "dark": "Dark theme",
+        "lightDefault": "Default: the hazelnut mark and the Mordjane name.",
+        "darkSameAsLight": "No dark version: the light logo is used in the dark theme too.",
+        "darkNeedsLight": "Upload a light logo first; the dark version is optional.",
+        "size": "Size",
+        "sizeHint": "Height of the logo in the header. Wide screens scale it up with the rest of the site.",
+        "saveSize": "Save size",
+        "sizeSaved": "Logo size saved.",
         "uploaded": "Logo updated.",
-        "resetBody": "Your uploaded logo will be deleted and the shop will show the hazelnut mark and the Mordjane name again."
+        "resetBody": "Your uploaded logo will be deleted and the shop will show the hazelnut mark and the Mordjane name again (the dark version too)."
       },
       "hero": {
         "title": "Home page photo",
@@ -626,6 +634,10 @@
         "preview": "Current home page photo",
         "uploaded": "Home page photo updated.",
         "resetBody": "Your uploaded photo will be deleted and the home page will show the default one again."
+      },
+      "logo-dark": {
+        "uploaded": "Dark theme logo updated.",
+        "resetBody": "Your dark theme logo will be deleted and the light logo will be used in the dark theme too."
       }
     }
   }

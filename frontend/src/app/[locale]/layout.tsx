@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { LogoProvider } from "@/components/brand/logo";
+import { DEFAULT_LOGO_HEIGHT, LogoProvider } from "@/components/brand/logo";
 import { Providers } from "@/components/providers";
 import { isRtl, routing } from "@/i18n/routing";
 import type { Appearance } from "@/lib/api";
@@ -107,7 +107,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: IN_APP_BROWSER }} />
         <NextIntlClientProvider>
-          <LogoProvider url={appearance?.logo_image_url ?? null}>
+          <LogoProvider
+            value={{
+              light: appearance?.logo_image_url ?? null,
+              dark: appearance?.logo_dark_image_url ?? null,
+              height: appearance?.logo_height ?? DEFAULT_LOGO_HEIGHT,
+            }}
+          >
             <Providers>{children}</Providers>
           </LogoProvider>
         </NextIntlClientProvider>
