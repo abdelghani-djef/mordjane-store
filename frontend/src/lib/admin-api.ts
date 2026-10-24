@@ -12,6 +12,7 @@ import {
   api,
   type AdminStats,
   type AdminUser,
+  type Appearance,
   type CategoryAdmin,
   type CategoryIn,
   type CategoryPatch,
@@ -50,6 +51,7 @@ export const adminKeys = {
   categories: ["admin", "categories"] as const,
   cities: ["admin", "delivery-cities"] as const,
   notifications: ["admin", "notifications"] as const,
+  appearance: ["admin", "appearance"] as const,
 };
 
 // --- auth ---------------------------------------------------------------------------------
@@ -435,6 +437,39 @@ export function useSendTestEmail() {
   return useMutation({
     mutationFn: (to?: string[]) =>
       api<TestEmailResult>("/admin/notifications/test", { method: "POST", json: { to } }),
+  });
+}
+
+// --- appearance: the storefront's home photo ----------------------------------------------
+
+export function useAppearance() {
+  return useQuery({
+    queryKey: adminKeys.appearance,
+    queryFn: () => api<Appearance>("/admin/appearance"),
+  });
+}
+
+/** The images an admin can replace under Appearance. */
+export type AppearanceSlot = "hero" | "logo";
+
+export function useUploadAppearanceImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ slot, file }: { slot: AppearanceSlot; file: File }) => {
+      const body = new FormData();
+      body.append("file", file);
+      return api<Appearance>(`/admin/appearance/${slot}-image`, { method: "POST", body });
+    },
+    onSuccess: (data) => qc.setQueryData(adminKeys.appearance, data),
+  });
+}
+
+export function useResetAppearanceImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (slot: AppearanceSlot) =>
+      api<Appearance>(`/admin/appearance/${slot}-image`, { method: "DELETE" }),
+    onSuccess: (data) => qc.setQueryData(adminKeys.appearance, data),
   });
 }
 

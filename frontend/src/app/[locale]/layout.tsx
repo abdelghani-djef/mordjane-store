@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { LogoProvider } from "@/components/brand/logo";
 import { Providers } from "@/components/providers";
 import { isRtl, routing } from "@/i18n/routing";
+import type { Appearance } from "@/lib/api";
+import { serverApi } from "@/lib/server-api";
 
 import "../globals.css";
 
@@ -91,6 +94,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  // Every page shows the logo; if the API is down, the built-in one keeps the admin login usable.
+  const appearance = await serverApi<Appearance>("/appearance").catch(() => null);
 
   return (
     <html
@@ -102,7 +107,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: IN_APP_BROWSER }} />
         <NextIntlClientProvider>
-          <Providers>{children}</Providers>
+          <LogoProvider url={appearance?.logo_image_url ?? null}>
+            <Providers>{children}</Providers>
+          </LogoProvider>
         </NextIntlClientProvider>
       </body>
     </html>

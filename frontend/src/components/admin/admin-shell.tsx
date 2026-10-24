@@ -6,6 +6,7 @@ import {
   LayoutDashboardIcon,
   LogOutIcon,
   PackageIcon,
+  PaletteIcon,
   ReceiptTextIcon,
   StoreIcon,
   TagsIcon,
@@ -45,6 +46,7 @@ const NAV = [
   { href: "/admin/categories", key: "categories", icon: TagsIcon },
   { href: "/admin/delivery", key: "delivery", icon: TruckIcon },
   { href: "/admin/notifications", key: "notifications", icon: BellIcon },
+  { href: "/admin/appearance", key: "appearance", icon: PaletteIcon },
 ] as const;
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

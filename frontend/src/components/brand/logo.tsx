@@ -1,4 +1,15 @@
+"use client";
+
+import { createContext, useContext } from "react";
+
 import { cn } from "@/lib/utils";
+
+const LogoUrl = createContext<string | null>(null);
+
+/** The logo an admin uploaded under Appearance; without one, the hazelnut mark and name show. */
+export function LogoProvider({ url, children }: { url: string | null; children: React.ReactNode }) {
+  return <LogoUrl value={url}>{children}</LogoUrl>;
+}
 
 /** Hazelnut on a red disc: the core ingredient of the range, in the brand red. */
 export function LogoMark({ className }: { className?: string }) {
@@ -15,6 +26,20 @@ export function LogoMark({ className }: { className?: string }) {
 }
 
 export function Logo({ className, tagline }: { className?: string; tagline?: string }) {
+  const url = useContext(LogoUrl);
+  if (url) {
+    return (
+      <span className={cn("inline-flex items-center gap-2", className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- any size or shape the admin uploads */}
+        <img src={url} alt="Mordjane" className="h-10 w-auto max-w-40 object-contain" />
+        {tagline && (
+          <span className="hidden max-w-[12ch] text-xs leading-tight text-muted-foreground sm:block">
+            {tagline}
+          </span>
+        )}
+      </span>
+    );
+  }
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <LogoMark />

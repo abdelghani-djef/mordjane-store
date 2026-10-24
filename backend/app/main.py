@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.routers import (
+    admin_appearance,
     admin_auth,
     admin_catalog,
     admin_notifications,
@@ -57,11 +58,13 @@ def create_app() -> FastAPI:
         admin_packs,
         admin_orders,
         admin_notifications,
+        admin_appearance,
     ):
         api.include_router(module.router)
     api.include_router(delivery.public)
     api.include_router(delivery.admin)
     api.include_router(delivery.admin_delegations)
+    api.include_router(admin_appearance.public)
 
     @api.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:

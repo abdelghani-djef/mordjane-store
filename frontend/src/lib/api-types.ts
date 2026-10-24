@@ -492,6 +492,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/appearance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Appearance */
+        get: operations["get_appearance_api_admin_appearance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/appearance/{slot}-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Appearance Image */
+        post: operations["upload_appearance_image_api_admin_appearance__slot__image_post"];
+        /**
+         * Reset Appearance Image
+         * @description Back to the image shipped with the frontend.
+         */
+        delete: operations["reset_appearance_image_api_admin_appearance__slot__image_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/delivery-cities": {
         parameters: {
             query?: never;
@@ -580,6 +618,23 @@ export interface paths {
         patch: operations["update_delegation_api_admin_delegations__delegation_id__patch"];
         trace?: never;
     };
+    "/api/appearance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Public Appearance */
+        get: operations["get_public_appearance_api_appearance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -637,6 +692,18 @@ export interface components {
             low_stock: components["schemas"]["LowStockOut"][];
             /** Low Stock Threshold */
             low_stock_threshold: number;
+        };
+        /** AppearanceOut */
+        AppearanceOut: {
+            /** Hero Image Url */
+            readonly hero_image_url: string | null;
+            /** Logo Image Url */
+            readonly logo_image_url: string | null;
+        };
+        /** Body_upload_appearance_image_api_admin_appearance__slot__image_post */
+        Body_upload_appearance_image_api_admin_appearance__slot__image_post: {
+            /** File */
+            file: string;
         };
         /** Body_upload_category_image_api_admin_categories__category_id__image_post */
         Body_upload_category_image_api_admin_categories__category_id__image_post: {
@@ -3233,6 +3300,107 @@ export interface operations {
             };
         };
     };
+    get_appearance_api_admin_appearance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppearanceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_appearance_image_api_admin_appearance__slot__image_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slot: "hero" | "logo";
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_appearance_image_api_admin_appearance__slot__image_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppearanceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_appearance_image_api_admin_appearance__slot__image_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slot: "hero" | "logo";
+            };
+            cookie?: {
+                mj_admin?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppearanceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_active_cities_api_delivery_cities_get: {
         parameters: {
             query?: never;
@@ -3488,6 +3656,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_public_appearance_api_appearance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppearanceOut"];
                 };
             };
         };

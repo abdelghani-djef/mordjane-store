@@ -250,7 +250,8 @@
       "packs": "Packs",
       "categories": "Catégories",
       "delivery": "Zones de livraison",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "appearance": "Apparence"
     },
     "login": {
       "title": "Connexion équipe",
@@ -600,6 +601,32 @@
           "label": "Commande annulée",
           "hint": "Quand une commande est annulée."
         }
+      }
+    },
+    "appearance": {
+      "title": "Apparence",
+      "subtitle": "Modifiez l'apparence de la boutique pour vos clients.",
+      "defaultBadge": "Par défaut",
+      "customBadge": "Importé",
+      "upload": "Importer une image",
+      "replace": "Remplacer",
+      "reset": "Utiliser l'image par défaut",
+      "resetTitle": "Revenir à l'image par défaut ?",
+      "cancel": "Annuler",
+      "resetDone": "Image par défaut rétablie.",
+      "logo": {
+        "title": "Logo",
+        "hint": "Affiché dans l'en-tête, le pied de page et le menu de la boutique, ainsi que dans ce panneau, sur environ 40 px de haut. Un PNG ou WebP à fond transparent convient le mieux ; JPEG, PNG ou WebP, 5 Mo maximum.",
+        "preview": "Logo actuel",
+        "uploaded": "Logo mis à jour.",
+        "resetBody": "Le logo importé sera supprimé et la boutique affichera de nouveau la noisette et le nom Mordjane."
+      },
+      "hero": {
+        "title": "Photo de la page d'accueil",
+        "hint": "La grande photo à côté du titre, en haut de la page d'accueil. Une photo large en paysage convient le mieux (environ 16:9) ; JPEG, PNG ou WebP, 5 Mo maximum.",
+        "preview": "Photo actuelle de la page d'accueil",
+        "uploaded": "Photo de la page d'accueil mise à jour.",
+        "resetBody": "La photo importée sera supprimée et la page d'accueil affichera de nouveau la photo par défaut."
       }
     }
   }

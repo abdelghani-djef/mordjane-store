@@ -5,17 +5,21 @@ import { getTranslations } from "next-intl/server";
 import { HeroScroll } from "@/components/home/hero-scroll";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { DEFAULT_HERO_IMAGE } from "@/lib/appearance";
 
 /**
- * The headline beside a breakfast-table photo of the jar. Scrolling away, the text rises and
- * fades and the photo comes forward.
+ * The headline beside the home photo (set under Admin → Appearance; a breakfast table by
+ * default). Scrolling away, the text rises and fades and the photo comes forward.
  */
 export async function HomeHero({
   spreads,
   rocher,
+  image,
 }: {
   spreads: string;
   rocher: string;
+  /** The admin's photo; null shows the default one. */
+  image: string | null;
 }) {
   const t = await getTranslations("Home");
   return (
@@ -54,7 +58,7 @@ export async function HomeHero({
         <div className="hero-arch">
           <div className="home-open relative aspect-[1376/768] overflow-hidden rounded-[2rem] shadow-[0_24px_48px_-24px_rgb(63_36_23/0.45)]">
             <Image
-              src="/images/home-hero.jpg"
+              src={image ?? DEFAULT_HERO_IMAGE}
               alt={t("heroPhoto")}
               fill
               preload
@@ -67,4 +71,3 @@ export async function HomeHero({
     </HeroScroll>
   );
 }
-

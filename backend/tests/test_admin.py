@@ -43,6 +43,11 @@ PNG_1PX = bytes.fromhex(
         ("delete", "/api/admin/packs/1"),
         ("post", "/api/admin/packs/1/image"),
         ("delete", "/api/admin/packs/1/image"),
+        ("get", "/api/admin/appearance"),
+        ("post", "/api/admin/appearance/hero-image"),
+        ("delete", "/api/admin/appearance/hero-image"),
+        ("post", "/api/admin/appearance/logo-image"),
+        ("delete", "/api/admin/appearance/logo-image"),
     ],
 )
 async def test_admin_endpoints_require_auth(client, method, path):
@@ -324,6 +329,60 @@ async def test_product_image_upload(client, admin_client, catalog):
         files={"file": ("evil.png", b"<script>alert(1)</script>", "image/png")},
     )
     assert fake.status_code == 415
+
+
+async def test_hero_image_upload_and_reset(client, admin_client):
+    # Nothing uploaded yet: the storefront keeps its built-in photo.
+    assert (await client.get("/api/appearance")).json()["hero_image_url"] is None
+
+    r = await admin_client.post(
+        "/api/admin/appearance/hero-image",
+        files={"file": ("hero.png", PNG_1PX, "image/png")},
+    )
+    assert r.status_code == 200, r.text
+    first = r.json()["hero_image_url"]
+    assert first.startswith("/media/appearance/")
+    assert (await client.get("/api/appearance")).json()["hero_image_url"] == first
+
+    r = await admin_client.post(
+        "/api/admin/appearance/hero-image",
+        files={"file": ("hero.png", PNG_1PX, "image/png")},
+    )
+    second = r.json()["hero_image_url"]
+    assert second != first and not _media_file(first).exists()
+
+    fake = await admin_client.post(
+        "/api/admin/appearance/hero-image",
+        files={"file": ("evil.png", b"<script>alert(1)</script>", "image/png")},
+    )
+    assert fake.status_code == 415
+
+    r = await admin_client.delete("/api/admin/appearance/hero-image")
+    assert r.json()["hero_image_url"] is None and not _media_file(second).exists()
+    assert (await client.get("/api/appearance")).json()["hero_image_url"] is None
+
+
+async def test_logo_upload_and_reset_leaves_hero_alone(client, admin_client):
+    assert (await client.get("/api/appearance")).json() == {
+        "hero_image_url": None,
+        "logo_image_url": None,
+    }
+    hero = await admin_client.post(
+        "/api/admin/appearance/hero-image", files={"file": ("h.png", PNG_1PX, "image/png")}
+    )
+    r = await admin_client.post(
+        "/api/admin/appearance/logo-image", files={"file": ("logo.png", PNG_1PX, "image/png")}
+    )
+    assert r.status_code == 200, r.text
+    logo = r.json()["logo_image_url"]
+    assert logo.startswith("/media/appearance/") and logo != hero.json()["hero_image_url"]
+    assert r.json()["hero_image_url"] == hero.json()["hero_image_url"]
+
+    r = await admin_client.delete("/api/admin/appearance/logo-image")
+    assert r.json()["logo_image_url"] is None and not _media_file(logo).exists()
+    assert r.json()["hero_image_url"] == hero.json()["hero_image_url"]
+
+    assert (await admin_client.delete("/api/admin/appearance/banner-image")).status_code == 422
 
 
 def _media_file(url):

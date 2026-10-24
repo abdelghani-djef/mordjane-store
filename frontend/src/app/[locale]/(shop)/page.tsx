@@ -6,7 +6,7 @@ import { HomeHero } from "@/components/home/hero";
 import { HomeShelves } from "@/components/home/shelves";
 import { SizeStory, type StoryBand, type StoryStep } from "@/components/home/size-story";
 import { resolveLocale } from "@/i18n/locale";
-import type { Category, Pack, Product, ProductPage } from "@/lib/api";
+import type { Appearance, Category, Pack, Product, ProductPage } from "@/lib/api";
 import { localizedName } from "@/lib/format";
 import { serverApi } from "@/lib/server-api";
 
@@ -50,10 +50,11 @@ function storyProduct(products: Product[]) {
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = await resolveLocale(params);
 
-  const [categories, catalog, featuredPacks] = await Promise.all([
+  const [categories, catalog, featuredPacks, appearance] = await Promise.all([
     serverApi<Category[]>("/categories"),
     serverApi<ProductPage>("/products", { page_size: 60 }),
     serverApi<Pack[]>("/packs", { featured: true }),
+    serverApi<Appearance>("/appearance"),
   ]);
   const spreads = findSlug(categories, /spread|tartin/, "spreads");
   const rocher = findSlug(categories, /rocher|crunch/, "rocher");
@@ -72,7 +73,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
-      <HomeHero spreads={spreads} rocher={rocher} />
+      <HomeHero spreads={spreads} rocher={rocher} image={appearance.hero_image_url} />
       <FeaturedPacks packs={featuredPacks} />
       <HomeShelves categories={categories} products={catalog.items} locale={locale} />
       {story && (

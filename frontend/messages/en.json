@@ -250,7 +250,8 @@
       "packs": "Packs",
       "categories": "Categories",
       "delivery": "Delivery areas",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "appearance": "Appearance"
     },
     "login": {
       "title": "Staff sign in",
@@ -600,6 +601,32 @@
           "label": "Order cancelled",
           "hint": "When an order is cancelled."
         }
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Change how the shop looks to customers.",
+      "defaultBadge": "Default",
+      "customBadge": "Uploaded",
+      "upload": "Upload an image",
+      "replace": "Replace",
+      "reset": "Use the default",
+      "resetTitle": "Go back to the default?",
+      "cancel": "Cancel",
+      "resetDone": "Default restored.",
+      "logo": {
+        "title": "Logo",
+        "hint": "Shown in the shop's header, footer and menu, and in this admin panel, at about 40 px high. A PNG or WebP with a transparent background works best; JPEG, PNG or WebP, up to 5 MB.",
+        "preview": "Current logo",
+        "uploaded": "Logo updated.",
+        "resetBody": "Your uploaded logo will be deleted and the shop will show the hazelnut mark and the Mordjane name again."
+      },
+      "hero": {
+        "title": "Home page photo",
+        "hint": "The large photo beside the headline at the top of the home page. A wide landscape photo works best (about 16:9); JPEG, PNG or WebP, up to 5 MB.",
+        "preview": "Current home page photo",
+        "uploaded": "Home page photo updated.",
+        "resetBody": "Your uploaded photo will be deleted and the home page will show the default one again."
       }
     }
   }

@@ -414,6 +414,19 @@ class NotificationSettings(TimestampMixin, Base):
     notify_customer_cancelled: Mapped[bool] = mapped_column(default=True)
 
 
+class AppearanceSettings(TimestampMixin, Base):
+    """How the storefront looks. A single row (id = 1), edited from the admin panel."""
+
+    __tablename__ = "appearance_settings"
+    __table_args__ = (CheckConstraint("id = 1", name="single_row"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    # The home page photo under MEDIA_DIR; None shows the one shipped with the frontend.
+    hero_image_path: Mapped[str | None] = mapped_column(String(255))
+    # The shop's logo under MEDIA_DIR; None shows the built-in hazelnut mark and name.
+    logo_image_path: Mapped[str | None] = mapped_column(String(255))
+
+
 class AdminUser(TimestampMixin, Base):
     __tablename__ = "admin_users"
 
