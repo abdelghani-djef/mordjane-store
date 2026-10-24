@@ -2,12 +2,12 @@ import { BanknoteIcon, MapPinnedIcon, PackageSearchIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { FeaturedPacks } from "@/components/home/featured-packs";
-import { HomeHero, type HeroSizes } from "@/components/home/hero";
+import { HomeHero } from "@/components/home/hero";
 import { HomeShelves } from "@/components/home/shelves";
 import { SizeStory, type StoryBand, type StoryStep } from "@/components/home/size-story";
 import { resolveLocale } from "@/i18n/locale";
 import type { Category, Pack, Product, ProductPage } from "@/lib/api";
-import { formatWeight, localizedName } from "@/lib/format";
+import { localizedName } from "@/lib/format";
 import { serverApi } from "@/lib/server-api";
 
 function findSlug(categories: Category[], pattern: RegExp, fallback: string) {
@@ -49,7 +49,6 @@ function storyProduct(products: Product[]) {
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = await resolveLocale(params);
-  const t = await getTranslations("Home");
 
   const [categories, catalog, featuredPacks] = await Promise.all([
     serverApi<Category[]>("/categories"),
@@ -71,24 +70,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       band: bandFor(size.weight_grams),
     })) ?? [];
 
-  const smallest = story?.sizes[0];
-  const largest = story?.sizes.at(-1);
-  const heroSizes: HeroSizes | null =
-    smallest && largest
-      ? {
-          jar: smallest.image_url!,
-          bucket: largest.image_url!,
-          label: t("heroArt", {
-            product: storyName,
-            small: formatWeight(smallest.weight_grams, locale) ?? "",
-            large: formatWeight(largest.weight_grams, locale) ?? "",
-          }),
-        }
-      : null;
-
   return (
     <>
-      <HomeHero spreads={spreads} rocher={rocher} sizes={heroSizes} />
+      <HomeHero spreads={spreads} rocher={rocher} />
       <FeaturedPacks packs={featuredPacks} />
       <HomeShelves categories={categories} products={catalog.items} locale={locale} />
       {story && (

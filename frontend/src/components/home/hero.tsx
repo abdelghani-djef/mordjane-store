@@ -2,30 +2,25 @@ import { BanknoteIcon, MapPinIcon } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
-import { HeroSpreadArt } from "@/components/brand/product-art";
 import { HeroScroll } from "@/components/home/hero-scroll";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
-export type HeroSizes = { jar: string; bucket: string; label: string };
-
 /**
- * The headline beside an arch holding the smallest and the biggest size of one spread. Scrolling
- * away, the text rises and fades, the arch comes forward and the small pack lifts out of it.
+ * The headline beside a breakfast-table photo of the jar. Scrolling away, the text rises and
+ * fades and the photo comes forward.
  */
 export async function HomeHero({
   spreads,
   rocher,
-  sizes,
 }: {
   spreads: string;
   rocher: string;
-  sizes: HeroSizes | null;
 }) {
   const t = await getTranslations("Home");
   return (
     <HeroScroll className="relative overflow-hidden bg-gradient-to-b from-soft via-soft/50 to-background">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pt-10 pb-16 sm:px-6 md:grid-cols-[1.15fr_1fr] md:gap-8 md:pt-16 md:pb-24">
+      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pt-10 pb-16 sm:px-6 md:grid-cols-[1fr_1.1fr] md:gap-8 md:pt-16 md:pb-24">
         <div className="hero-text">
           <h1 className="home-rise max-w-[13ch] text-5xl leading-[1.02] text-balance sm:text-6xl lg:text-7xl xl:text-[5.25rem]">
             {t("title")}
@@ -56,59 +51,20 @@ export async function HomeHero({
           </ul>
         </div>
 
-        {sizes ? (
-          <HeroArch sizes={sizes} />
-        ) : (
-          <div className="mx-auto w-full max-w-md">
-            <HeroSpreadArt label={t("heroArtFallback")} />
+        <div className="hero-arch">
+          <div className="home-open relative aspect-[1376/768] overflow-hidden rounded-[2rem] shadow-[0_24px_48px_-24px_rgb(63_36_23/0.45)]">
+            <Image
+              src="/images/home-hero.jpg"
+              alt={t("heroPhoto")}
+              fill
+              preload
+              sizes="(min-width: 1280px) 40rem, (min-width: 768px) 52vw, 100vw"
+              className="object-cover"
+            />
           </div>
-        )}
+        </div>
       </div>
     </HeroScroll>
   );
 }
 
-function HeroArch({ sizes }: { sizes: HeroSizes }) {
-  return (
-    <div
-      role="img"
-      aria-label={sizes.label}
-      className="hero-arch relative mx-auto w-full max-w-sm sm:max-w-md lg:max-w-[30rem]"
-    >
-      <div className="home-open niche aspect-[5/6]">
-        {/* A second, inset arch line: the niche is carved, not drawn. */}
-        <div className="pointer-events-none absolute inset-3 rounded-t-full border border-[#7a3f12]/10" />
-        {/*
-          Photos are shot on white and multiplied onto the niche. The blend sits on the outer
-          (moving) wrapper: a transformed element is its own layer, so a blend inside it would
-          only mix with that empty layer. Side by side, the jar and bucket never overlap.
-        */}
-        <div className="hero-large absolute start-[2%] bottom-[3%] aspect-square w-[68%] mix-blend-multiply">
-          <div className="home-drop relative size-full [--delay:150ms]">
-            <Image
-              src={sizes.bucket}
-              alt=""
-              fill
-              preload
-              sizes="(min-width: 768px) 20rem, 60vw"
-              className="object-contain object-bottom"
-            />
-          </div>
-        </div>
-        <div className="hero-small absolute end-[2%] bottom-[3%] aspect-square w-[42%] mix-blend-multiply">
-          <div className="home-drop relative size-full [--delay:340ms]">
-            <Image
-              src={sizes.jar}
-              alt=""
-              fill
-              preload
-              sizes="(min-width: 768px) 12rem, 40vw"
-              className="object-contain object-bottom"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="home-open -mx-[4%] h-3 rounded-full bg-plank shadow-[0_14px_18px_-12px_rgb(63_36_23/0.6)]" />
-    </div>
-  );
-}
