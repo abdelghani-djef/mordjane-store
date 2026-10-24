@@ -23,6 +23,8 @@ ARG BACKEND_URL=http://mordjane-api:8000
 ENV BACKEND_URL=$BACKEND_URL
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
+# Standalone output leaves out public/ (the home hero photo), so it is copied in by hand.
+COPY --from=build --chown=node:node /app/public ./public
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
