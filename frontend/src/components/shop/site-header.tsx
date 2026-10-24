@@ -33,7 +33,13 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
         {t("Nav.skipToContent")}
       </a>
       <div className="mx-auto flex min-h-16 max-w-7xl items-center gap-2 px-4 py-2 sm:gap-4 sm:px-6">
-        <MobileNav links={[...links, { href: "/track", label: t("Nav.track") }]} />
+        <MobileNav
+          links={[
+            ...links,
+            { href: "/track", label: t("Nav.track") },
+            { href: "/contact", label: t("Nav.contact") },
+          ]}
+        />
         <Link href="/" className="shrink-0 rounded-md" aria-label="Mordjane">
           <Logo />
         </Link>
@@ -58,6 +64,12 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
             className="me-1 hidden rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap text-foreground/80 transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
           >
             {t("Nav.track")}
+          </Link>
+          <Link
+            href="/contact"
+            className="me-1 hidden rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap text-foreground/80 transition-colors hover:bg-muted hover:text-foreground xl:inline-flex"
+          >
+            {t("Nav.contact")}
           </Link>
           <Suspense>
             <LanguageSwitcher />

@@ -18,7 +18,8 @@
     "themeLight": "Clair",
     "themeDark": "Sombre",
     "themeSystem": "Système",
-    "skipToContent": "Aller au contenu"
+    "skipToContent": "Aller au contenu",
+    "contact": "Contact"
   },
   "Home": {
     "title": "Crèmes de noisettes, lisses ou croquantes",
@@ -212,6 +213,15 @@
     "copy": "Copier le code",
     "copied": "Copié"
   },
+  "Contact": {
+    "title": "Nous contacter",
+    "subtitle": "Une question sur un produit, une commande ou une livraison ? Appelez-nous ou écrivez-nous sur les réseaux sociaux.",
+    "phoneLabel": "Téléphone",
+    "phoneHours": "Appelez-nous ou envoyez-nous un SMS.",
+    "socialLabel": "Réseaux sociaux",
+    "socialText": "Suivez-nous pour les nouveautés et les offres, ou écrivez-nous en message privé.",
+    "orderHint": "Une question sur une commande ? Gardez son code sous la main, ou <track>suivez-la ici</track>."
+  },
   "Status": {
     "pending": "En attente",
     "validated": "Validée",
@@ -231,7 +241,10 @@
     "shop": "Boutique",
     "help": "Aide",
     "rights": "© {year} Mordjane. Tous droits réservés.",
-    "admin": "Espace équipe"
+    "admin": "Espace équipe",
+    "contact": "Nous contacter",
+    "followUs": "Suivez-nous",
+    "call": "Appelez-nous"
   },
   "NotFound": {
     "title": "Cette page a fondu",

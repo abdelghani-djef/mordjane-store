@@ -18,7 +18,8 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "contact": "Contact us"
   },
   "Home": {
     "title": "Hazelnut creams, smooth or crunchy",
@@ -212,6 +213,15 @@
     "copy": "Copy code",
     "copied": "Copied"
   },
+  "Contact": {
+    "title": "Contact us",
+    "subtitle": "A question about a product, an order or a delivery? Call us or send us a message on social media.",
+    "phoneLabel": "Phone",
+    "phoneHours": "Call or text us.",
+    "socialLabel": "Social media",
+    "socialText": "Follow us for new products and offers, or message us there.",
+    "orderHint": "Asking about an order? Keep its code handy, or <track>track it here</track>."
+  },
   "Status": {
     "pending": "Pending",
     "validated": "Validated",
@@ -231,7 +241,10 @@
     "shop": "Shop",
     "help": "Help",
     "rights": "© {year} Mordjane. All rights reserved.",
-    "admin": "Staff"
+    "admin": "Staff",
+    "contact": "Contact us",
+    "followUs": "Follow us",
+    "call": "Call us"
   },
   "NotFound": {
     "title": "This page melted away",
